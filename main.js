@@ -65,15 +65,8 @@ function typeEffect() {
 // Start typing immediately after DOM loads
 document.addEventListener("DOMContentLoaded", typeEffect);
 
-// Mobile detection
-const isMobile = window.innerWidth <= 768 || navigator.maxTouchPoints > 0;
-
 // Performance limits
-const maxGrass = isMobile ? 3000 : 10000;
-const maxDirt = isMobile ? 2500 : 8000;
-const maxWood = isMobile ? 1000 : 4000;
-const maxLeaves = isMobile ? 2000 : 8000;
-const maxSandstone = isMobile ? 1000 : 4000;
+const maxGrass = 10000, maxDirt = 8000, maxWood = 4000, maxLeaves = 8000, maxSandstone = 4000;
 
 function init() {
     setupScene();
@@ -107,9 +100,9 @@ function setupScene() {
     camera.lookAt(0, 0, -20);
 
     renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: "high-performance" });
-    renderer.setPixelRatio(isMobile ? 1.0 : Math.min(window.devicePixelRatio, 1.5));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.shadowMap.enabled = !isMobile;
+    renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 }
 
@@ -119,7 +112,7 @@ function setupLights() {
 
     dirLight = new THREE.DirectionalLight(0xfff5b6, 2.5);
     dirLight.position.set(50, 100, 50);
-    dirLight.castShadow = !isMobile;
+    dirLight.castShadow = true;
     dirLight.shadow.mapSize.width = 2048;
     dirLight.shadow.mapSize.height = 2048;
     dirLight.shadow.camera.near = 0.5;
@@ -137,16 +130,13 @@ function setupPostProcessing() {
     const renderPass = new RenderPass(scene, camera);
     composer.addPass(renderPass);
 
-    if (!isMobile) {
-        const ssaoPass = new SSAOPass(scene, camera, window.innerWidth, window.innerHeight);
-        ssaoPass.kernelRadius = 16;
-        ssaoPass.minDistance = 0.005;
-        ssaoPass.maxDistance = 0.1;
-        composer.addPass(ssaoPass);
-    }
+    const ssaoPass = new SSAOPass(scene, camera, window.innerWidth, window.innerHeight);
+    ssaoPass.kernelRadius = 16;
+    ssaoPass.minDistance = 0.005;
+    ssaoPass.maxDistance = 0.1;
+    composer.addPass(ssaoPass);
 
-    const bloomResolution = isMobile ? new THREE.Vector2(window.innerWidth / 2, window.innerHeight / 2) : new THREE.Vector2(window.innerWidth, window.innerHeight);
-    const bloomPass = new UnrealBloomPass(bloomResolution, 1.0, 0.4, 0.85);
+    const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.0, 0.4, 0.85);
     composer.addPass(bloomPass);
 
     const vignettePass = new ShaderPass(VignetteShader);
@@ -252,21 +242,14 @@ function createWorld() {
         }
     };
 
-    if (isMobile) {
-        genArea(-8, 8, 20, -30);
-        genArea(-60, -15, -15, -25);
-        genArea(-55, -45, -30, -90);
-        genArea(-90, -60, -75, -85);
-    } else {
-        // Hero -> What I do (Forward Z)
-        genArea(-15, 15, 20, -30);
-        // Skills -> Projects (Left X)
-        genArea(-60, -15, -10, -30);
-        // Experience -> Connect (Forward Z)
-        genArea(-60, -40, -30, -90);
-        // Connect (Left X)
-        genArea(-90, -60, -70, -90);
-    }
+    // Hero -> What I do (Forward Z)
+    genArea(-15, 15, 20, -30);
+    // Skills -> Projects (Left X)
+    genArea(-60, -15, -10, -30);
+    // Experience -> Connect (Forward Z)
+    genArea(-60, -40, -30, -90);
+    // Connect (Left X)
+    genArea(-90, -60, -70, -90);
 
     Object.keys(meshes).forEach(type => {
         meshes[type].count = counts[type];
@@ -320,22 +303,39 @@ function createTextSprite(text, fontSize = 40, color = 'white', bgColor = null) 
 
 function createSpecialScenes() {
     // 1. The 7 Skills Sandstone Blocks (Tightly packed, horizontally centered around Z = -10)
-    let bz = -5.5; // Center is -10, spacing is 1.5. Spans from -5.5 to -14.5
+    const isMobile = window.innerWidth <= 768;
     skillsList.forEach((skill, i) => {
         const mat = new THREE.MeshStandardMaterial({ color: 0xeeddcc, roughness: 0.9 });
         const box = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.2, 1.2), mat);
-        box.position.set(-10, -1.0, bz); // Y=-1.0 is just above the flattened terrain, X=-10 is close to camera
+        
+        let bx = -10;
+        let by = -1.0;
+        let boxZ = -5.5 - (i * 1.5);
+        
+        if (isMobile) {
+            if (i < 4) {
+                // Top row (4 boxes)
+                by = 1.0;
+                boxZ = -7.75 - (i * 1.5); // Spans -7.75 to -12.25
+            } else {
+                // Bottom row (3 boxes)
+                by = -0.5;
+                boxZ = -8.5 - ((i - 4) * 1.5); // Spans -8.5 to -11.5
+            }
+        }
+        
+        box.position.set(bx, by, boxZ);
         box.castShadow = true;
         box.userData = { isBreakable: true, skill: skill };
         scene.add(box);
         breakableBlocks.push(box);
-
-        bz -= 1.5; // Tighter spacing so they fit beautifully on screen
     });
 
     // Big bouncing text over the center box (Z = -10)
     clickBoxesInstruction = createTextSprite("click the boxes!", 30, '#ffaa00');
-    clickBoxesInstruction.position.set(-10, 1.0, -10);
+    const textBaseY = isMobile ? 3.0 : 1.0;
+    clickBoxesInstruction.position.set(-10, textBaseY, -10);
+    clickBoxesInstruction.userData.baseY = textBaseY;
     clickBoxesInstruction.scale.set(4, 1, 1);
     scene.add(clickBoxesInstruction);
 
@@ -400,28 +400,55 @@ function createSpecialScenes() {
 
     // 2. The 4 Project Plants (Horizontal row perfectly parallel to camera at X=-38)
     const projectTexts = ["E-Voting system", "LMS Platform", "Websites", "Crop Prediction Tool"];
-    let pz = -15.5; // Center is -20. Spacing is 3 units.
     projectTexts.forEach((p, i) => {
-        // Dirt base (pot)
+        let px = -45;
+        let py = 0;
+        let pz;
+        
+        if (isMobile) {
+            // Zig-Zag Staggered Layout for Mobile
+            py = (i % 2 === 0) ? 3 : 0; // Alternate between elevated and ground
+            pz = -15.5 - (i * 3); // Spaced evenly in Z
+        } else {
+            pz = -15.5 - (i * 3);
+        }
+
         const matDirt = new THREE.MeshStandardMaterial({ color: 0x5c4033, roughness: 1.0 });
+        
+        // Build dirt pillar if elevated
+        if (isMobile && py > 0) {
+            for (let y = 0; y < py; y++) {
+                const dirtCol = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), matDirt);
+                dirtCol.position.set(px, y, pz);
+                dirtCol.castShadow = true;
+                scene.add(dirtCol);
+            }
+        }
+
+        // Dirt base (pot)
         const dirt = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), matDirt);
-        dirt.position.set(-45, 0, pz);
+        dirt.position.set(px, py, pz);
         dirt.castShadow = true;
         scene.add(dirt);
 
         // Leaves top (plant)
         const matLeaves = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.9 });
         const leaves = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.2, 1.2), matLeaves);
-        leaves.position.set(-45, 1, pz);
+        leaves.position.set(px, py + 1, pz);
         leaves.castShadow = true;
         scene.add(leaves);
 
         // Project text floating exactly in front/above the plant
         const sprite = createProjectSprite(p);
-        sprite.position.set(-45, 2.5, pz);
+        if (isMobile) {
+            sprite.scale.set(5.5, 1.375, 1);
+            // Pull text slightly forward in X to avoid clipping into neighboring pillars
+            sprite.position.set(px + 1.5, py + 2.5, pz);
+        } else {
+            sprite.scale.set(2.8, 0.7, 1);
+            sprite.position.set(px, py + 2.5, pz);
+        }
         scene.add(sprite);
-
-        pz -= 3; // Space them out evenly in a line
     });
 
     // 3. Connect With Me House (Red & Silver, Evening, X = -80, Z = -80)
@@ -507,6 +534,7 @@ function playCrunchSound() {
 }
 
 function setupScrollAnimation() {
+    const isMobile = window.innerWidth <= 768;
     const tl = gsap.timeline({
         scrollTrigger: {
             trigger: "body",
@@ -537,6 +565,18 @@ function setupScrollAnimation() {
                             if(customCursor) customCursor.style.display = 'none';
                             isAxeEquipped = false;
                         }
+                    }
+                }
+
+                // Hide the 'services' HTML section to prevent overlap with the fixed Skills UI
+                const servicesSec = document.getElementById('services');
+                if (servicesSec) {
+                    if (t > 2.1) {
+                        servicesSec.style.opacity = '0';
+                        servicesSec.style.pointerEvents = 'none';
+                    } else {
+                        servicesSec.style.opacity = '1';
+                        servicesSec.style.pointerEvents = 'auto';
                     }
                 }
 
@@ -571,10 +611,36 @@ function setupScrollAnimation() {
                 // Ensure Experience section only appears when its 3D section is active (Rest at 4.5 - 5.0)
                 const expSection = document.getElementById('experience');
                 if (expSection) {
-                    if (t >= 4.5 && t < 5.0) {
+                    if (t >= 4.1 && t < 5.5) {
                         expSection.style.opacity = '1';
+                        expSection.style.pointerEvents = 'auto';
                     } else {
                         expSection.style.opacity = '0';
+                        expSection.style.pointerEvents = 'none';
+                    }
+                }
+
+                // UI Visibility for FAQ (Rest at 5.5 - 6.0)
+                const faqSection = document.getElementById('faq');
+                if (faqSection) {
+                    if (t >= 5.1 && t < 6.5) {
+                        faqSection.style.opacity = '1';
+                        faqSection.style.pointerEvents = 'auto';
+                    } else {
+                        faqSection.style.opacity = '0';
+                        faqSection.style.pointerEvents = 'none';
+                    }
+                }
+
+                // UI Visibility for Contact (Rest at 6.5 - 7.5)
+                const contactSection = document.getElementById('contact');
+                if (contactSection) {
+                    if (t >= 6.1) {
+                        contactSection.style.opacity = '1';
+                        contactSection.style.pointerEvents = 'auto';
+                    } else {
+                        contactSection.style.opacity = '0';
+                        contactSection.style.pointerEvents = 'none';
                     }
                 }
             }
@@ -595,10 +661,10 @@ function setupScrollAnimation() {
 
     // 2 -> 3: What I Do -> Skills
     tl.to(camera.rotation, { y: Math.PI / 2, duration: 0.5 }, 2)
-      .to(camera.position, { x: -2, duration: 0.5 }, 2); 
+      .to(camera.position, { x: isMobile ? 6 : -2, duration: 0.5 }, 2); 
 
     // 3 -> 4: Skills -> Projects
-    tl.to(camera.position, { x: -38, z: -20, duration: 0.5 }, 3);
+    tl.to(camera.position, { x: isMobile ? -28 : -38, z: -20, duration: 0.5 }, 3);
 
     // 4 -> 5: Projects -> Experience (Turn Right 90deg, go Straight -Z)
     tl.to(camera.rotation, { y: 0, duration: 0.5 }, 4)
@@ -696,7 +762,8 @@ function animate() {
 
     // Bouncing text animation
     if (clickBoxesInstruction && clickBoxesInstruction.material.opacity > 0) {
-        clickBoxesInstruction.position.y = 1.0 + Math.sin(time * 4) * 0.15;
+        const baseY = clickBoxesInstruction.userData.baseY || 1.0;
+        clickBoxesInstruction.position.y = baseY + Math.sin(time * 4) * 0.15;
     }
 
     // Mobs Animation

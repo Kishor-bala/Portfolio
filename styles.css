@@ -600,108 +600,96 @@ strong {
     text-shadow: 2px 2px 0px rgba(0,0,0,0.8) !important;
 }
 
-/* UI Fixed Wrappers (Desktop Default) */
-.ui-wrapper-fixed {
-    position: fixed;
-    top: 15%;
-    left: 0;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.5s ease;
-    z-index: 999;
-    width: 100vw;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-.projects-subtitle {
-    color: white;
-    font-size: 1.5rem;
-    text-shadow: 2px 2px 0px rgba(0,0,0,0.8);
-    margin-top: 10px;
-    font-family: var(--font-pixel);
-}
-
-.skills-ui-fixed {
-    position: fixed;
-    top: 35%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.5s ease;
-    z-index: 100;
-    width: 100%;
-    max-width: 800px;
-    text-align: center;
-}
-
-.skills-instructions {
-    font-family: var(--font-sans);
-    color: white;
-}
-
 /* Responsive */
-@media (max-width: 1024px) {
-    .cards-container {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .content.split-left {
-        width: 80% !important;
-        margin: 0 auto !important;
-        float: none;
-    }
-}
-
 @media (max-width: 768px) {
     .glitch-text { font-size: 2rem; }
-    .cards-container { grid-template-columns: 1fr; gap: 1rem; }
-    h2 { font-size: 1.2rem; gap: 10px; }
-    .section { padding: 0 5%; }
-    
-    /* Layout Fixes */
-    .content.split-left { 
-        width: 100% !important; 
-        margin: 0 !important; 
-        float: none; 
+    .cards-container { 
+        grid-template-columns: 1fr; 
+        gap: 1rem;
     }
-    
-    /* Scale down UI Wrappers to prevent overflow */
-    .projects-subtitle {
-        font-size: 0.8rem;
+    .project-card {
+        aspect-ratio: auto; /* Remove 1:1 square constraint on mobile */
+        padding: 1.5rem 1rem;
+        min-height: auto;
     }
-    .ui-wrapper-fixed {
-        top: 10%;
+    h2 { font-size: 1.5rem !important; } /* Slightly larger headings */
+    .section { 
+        padding: 0 5%; 
+        align-items: flex-start !important; /* Start from top on mobile to avoid cutting off headings */
+        padding-top: 80px !important; /* Give room for fixed UI elements */
     }
-    .skills-ui-fixed {
-        top: 25%;
-        padding: 0 1rem;
+
+    #skills-ui-wrapper {
+        width: 90% !important;
+        top: 15% !important; /* Move UI up to top to avoid covering 3D elements */
+    }
+    #skills h2 {
+        font-size: 1.2rem !important; /* Force override */
+        white-space: nowrap; /* Prevent "My Skills" from wrapping */
     }
     #active-skill-label {
-        font-size: 0.8rem;
         padding: 10px;
-        min-height: 80px;
+        gap: 8px;
+        min-height: auto;
+    }
+    #active-skill-label .duration {
+        padding: 6px 10px;
+        font-size: 0.65rem !important;
+    }
+    #skills-content p {
+        font-size: 0.9rem;
+    }
+    .break-hint {
+        font-size: 0.7rem;
     }
     
-    /* Panel Adjustments */
-    .panel {
-        padding: 1.5rem;
+    #projects-ui-wrapper p {
+        font-size: 0.8rem !important; /* Scale down the pixel font */
+        white-space: nowrap; /* Prevent "learn | build | improve" from wrapping */
+    }
+    #projects-ui-wrapper h2 {
+        font-size: 1.2rem !important;
+        white-space: nowrap;
+    }
+    .content.split-left {
+        width: 58% !important; /* Narrower to show 3D house on the right */
+        max-width: none !important;
+        margin: 0 !important;
+        margin-left: 2% !important;
+        float: left !important;
     }
     .contact .panel {
-        padding: 1.5rem;
+        padding: 1rem !important;
+        border-radius: 12px;
     }
     .contact h2 {
-        font-size: 1.5rem;
+        font-size: 1rem !important;
+        margin-bottom: 0.4rem;
     }
-    
-    /* Fix FAQ text sizes for mobile */
-    .accordion-item p, .accordion-item div, .accordion-item span {
-        font-size: 0.9rem !important;
+    .contact p {
+        font-size: 0.75rem !important;
+        line-height: 1.3;
+        margin-bottom: 0.5rem;
     }
-    .accordion-item h3 {
-        font-size: 1.1rem !important;
+    .contact-form {
+        gap: 0.5rem;
+    }
+    .form-group input, .form-group textarea {
+        padding: 0.5rem !important;
+        font-size: 0.8rem;
+    }
+    .submit-btn {
+        padding: 0.6rem !important;
+        font-size: 0.7rem !important;
+    }
+    .social-links {
+        margin-top: 1rem;
+        gap: 0.5rem;
+    }
+    .social-btn {
+        width: 100%;
+        padding: 0.5rem !important;
+        font-size: 0.75rem !important;
+        justify-content: center;
     }
 }
