@@ -23,9 +23,9 @@
     <main id="ui-layer">
         
         <!-- Fixed Projects Header -->
-        <div id="projects-ui-wrapper" style="position: fixed; top: 15%; left: 0; opacity: 0; pointer-events: none; transition: opacity 0.5s ease; z-index: 999; width: 100vw; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+        <div id="projects-ui-wrapper" class="ui-wrapper-fixed">
             <h2><span class="icon">💻</span> My Projects</h2>
-            <p style="color: white; font-size: 1.5rem; text-shadow: 2px 2px 0px rgba(0,0,0,0.8); margin-top: 10px; font-family: var(--font-pixel);">learn | build | improve</p>
+            <p class="projects-subtitle">learn | build | improve</p>
         </div>
 
         <section class="section hero" id="hero">
@@ -71,11 +71,11 @@
         </section>
 
         <section class="section skills" id="skills">
-            <div class="content" id="skills-ui-wrapper" style="position: fixed; top: 35%; left: 50%; transform: translate(-50%, -50%); opacity: 0; pointer-events: none; transition: opacity 0.5s ease; z-index: 100; width: 100%; max-width: 800px; text-align: center;">
+            <div class="content skills-ui-fixed" id="skills-ui-wrapper">
                 <h2><span class="icon">⚔️</span> My Skills</h2>
                 <div class="break-hint" id="break-hint" style="color: #55ff55;">All skills revealed! Keep scrolling.</div>
                 <div id="skills-content">
-                    <p style="font-family: var(--font-sans); color: white;">Select a block to view my expertise:</p>
+                    <p class="skills-instructions">Select a block to view my expertise:</p>
                     <div id="active-skill-label"></div>
                 </div>
             </div>

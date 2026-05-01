@@ -600,10 +600,108 @@ strong {
     text-shadow: 2px 2px 0px rgba(0,0,0,0.8) !important;
 }
 
+/* UI Fixed Wrappers (Desktop Default) */
+.ui-wrapper-fixed {
+    position: fixed;
+    top: 15%;
+    left: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+    z-index: 999;
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.projects-subtitle {
+    color: white;
+    font-size: 1.5rem;
+    text-shadow: 2px 2px 0px rgba(0,0,0,0.8);
+    margin-top: 10px;
+    font-family: var(--font-pixel);
+}
+
+.skills-ui-fixed {
+    position: fixed;
+    top: 35%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+    z-index: 100;
+    width: 100%;
+    max-width: 800px;
+    text-align: center;
+}
+
+.skills-instructions {
+    font-family: var(--font-sans);
+    color: white;
+}
+
 /* Responsive */
+@media (max-width: 1024px) {
+    .cards-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .content.split-left {
+        width: 80% !important;
+        margin: 0 auto !important;
+        float: none;
+    }
+}
+
 @media (max-width: 768px) {
     .glitch-text { font-size: 2rem; }
-    .cards-container { grid-template-columns: 1fr; }
-    h2 { font-size: 1.2rem; }
+    .cards-container { grid-template-columns: 1fr; gap: 1rem; }
+    h2 { font-size: 1.2rem; gap: 10px; }
     .section { padding: 0 5%; }
+    
+    /* Layout Fixes */
+    .content.split-left { 
+        width: 100% !important; 
+        margin: 0 !important; 
+        float: none; 
+    }
+    
+    /* Scale down UI Wrappers to prevent overflow */
+    .projects-subtitle {
+        font-size: 0.8rem;
+    }
+    .ui-wrapper-fixed {
+        top: 10%;
+    }
+    .skills-ui-fixed {
+        top: 25%;
+        padding: 0 1rem;
+    }
+    #active-skill-label {
+        font-size: 0.8rem;
+        padding: 10px;
+        min-height: 80px;
+    }
+    
+    /* Panel Adjustments */
+    .panel {
+        padding: 1.5rem;
+    }
+    .contact .panel {
+        padding: 1.5rem;
+    }
+    .contact h2 {
+        font-size: 1.5rem;
+    }
+    
+    /* Fix FAQ text sizes for mobile */
+    .accordion-item p, .accordion-item div, .accordion-item span {
+        font-size: 0.9rem !important;
+    }
+    .accordion-item h3 {
+        font-size: 1.1rem !important;
+    }
 }

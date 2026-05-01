@@ -65,8 +65,15 @@ function typeEffect() {
 // Start typing immediately after DOM loads
 document.addEventListener("DOMContentLoaded", typeEffect);
 
+// Mobile detection
+const isMobile = window.innerWidth <= 768 || navigator.maxTouchPoints > 0;
+
 // Performance limits
-const maxGrass = 10000, maxDirt = 8000, maxWood = 4000, maxLeaves = 8000, maxSandstone = 4000;
+const maxGrass = isMobile ? 3000 : 10000;
+const maxDirt = isMobile ? 2500 : 8000;
+const maxWood = isMobile ? 1000 : 4000;
+const maxLeaves = isMobile ? 2000 : 8000;
+const maxSandstone = isMobile ? 1000 : 4000;
 
 function init() {
     setupScene();
@@ -100,9 +107,9 @@ function setupScene() {
     camera.lookAt(0, 0, -20);
 
     renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: "high-performance" });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    renderer.setPixelRatio(isMobile ? 1.0 : Math.min(window.devicePixelRatio, 1.5));
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.enabled = !isMobile;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 }
 
@@ -112,7 +119,7 @@ function setupLights() {
 
     dirLight = new THREE.DirectionalLight(0xfff5b6, 2.5);
     dirLight.position.set(50, 100, 50);
-    dirLight.castShadow = true;
+    dirLight.castShadow = !isMobile;
     dirLight.shadow.mapSize.width = 2048;
     dirLight.shadow.mapSize.height = 2048;
     dirLight.shadow.camera.near = 0.5;
@@ -130,13 +137,16 @@ function setupPostProcessing() {
     const renderPass = new RenderPass(scene, camera);
     composer.addPass(renderPass);
 
-    const ssaoPass = new SSAOPass(scene, camera, window.innerWidth, window.innerHeight);
-    ssaoPass.kernelRadius = 16;
-    ssaoPass.minDistance = 0.005;
-    ssaoPass.maxDistance = 0.1;
-    composer.addPass(ssaoPass);
+    if (!isMobile) {
+        const ssaoPass = new SSAOPass(scene, camera, window.innerWidth, window.innerHeight);
+        ssaoPass.kernelRadius = 16;
+        ssaoPass.minDistance = 0.005;
+        ssaoPass.maxDistance = 0.1;
+        composer.addPass(ssaoPass);
+    }
 
-    const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.0, 0.4, 0.85);
+    const bloomResolution = isMobile ? new THREE.Vector2(window.innerWidth / 2, window.innerHeight / 2) : new THREE.Vector2(window.innerWidth, window.innerHeight);
+    const bloomPass = new UnrealBloomPass(bloomResolution, 1.0, 0.4, 0.85);
     composer.addPass(bloomPass);
 
     const vignettePass = new ShaderPass(VignetteShader);
@@ -242,14 +252,21 @@ function createWorld() {
         }
     };
 
-    // Hero -> What I do (Forward Z)
-    genArea(-15, 15, 20, -30);
-    // Skills -> Projects (Left X)
-    genArea(-60, -15, -10, -30);
-    // Experience -> Connect (Forward Z)
-    genArea(-60, -40, -30, -90);
-    // Connect (Left X)
-    genArea(-90, -60, -70, -90);
+    if (isMobile) {
+        genArea(-8, 8, 20, -30);
+        genArea(-60, -15, -15, -25);
+        genArea(-55, -45, -30, -90);
+        genArea(-90, -60, -75, -85);
+    } else {
+        // Hero -> What I do (Forward Z)
+        genArea(-15, 15, 20, -30);
+        // Skills -> Projects (Left X)
+        genArea(-60, -15, -10, -30);
+        // Experience -> Connect (Forward Z)
+        genArea(-60, -40, -30, -90);
+        // Connect (Left X)
+        genArea(-90, -60, -70, -90);
+    }
 
     Object.keys(meshes).forEach(type => {
         meshes[type].count = counts[type];
