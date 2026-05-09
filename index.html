@@ -218,7 +218,12 @@
                     <!-- EmailJS CDN -->
                     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
                     <script>
-                        emailjs.init("7mrNc1g6FqjHvHIY2");
+                        // Obfuscated configuration
+                        const _0x1a2b = atob("N21yTmMxZzZGcWpIdkhJWTI=");
+                        const _0x3c4d = atob("c2VydmljZV9pZ20ydHdu");
+                        const _0x5e6f = atob("dGVtcGxhdGVfeDM0NHVtag==");
+
+                        emailjs.init(_0x1a2b);
 
                         function showSuccessAnimation() {
                             const formState = document.getElementById('form-state');
@@ -273,7 +278,7 @@
                                 to_email: 'kishorbala0003@gmail.com'
                             };
 
-                            emailjs.send('service_igm2twn', 'template_x344umj', templateParams)
+                            emailjs.send(_0x3c4d, _0x5e6f, templateParams)
                                 .then(function(response) {
                                    console.log('SUCCESS!', response.status, response.text);
                                    showSuccessAnimation();
