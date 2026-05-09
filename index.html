@@ -132,34 +132,159 @@
 
         <section class="section contact" id="contact">
             <div class="content split-left">
-                <div class="panel">
-                    <h2><span class="icon">📫</span> Connect With Me</h2>
-                    <p>I am currently open to new opportunities, collaborations, and exciting projects. Send me a message!</p>
-                    
-                    <form class="contact-form">
-                        <div class="form-group">
-                            <input type="text" placeholder="Your Name" required>
-                        </div>
-                        <div class="form-group">
-                            <input type="email" placeholder="Your Email" required>
-                        </div>
-                        <div class="form-group">
-                            <textarea rows="4" placeholder="Your Message" required></textarea>
-                        </div>
-                        <button type="submit" class="submit-btn">Send Message</button>
-                    </form>
+                <div class="panel" style="position: relative; overflow: hidden; min-height: 500px;">
+                    <div id="form-state" style="transition: opacity 0.5s ease; position: relative; z-index: 1;">
+                        <h2><span class="icon">📫</span> Connect With Me</h2>
+                        <p>I am currently open to new opportunities, collaborations, and exciting projects. Send me a message!</p>
+                        
+                        <form class="contact-form" id="contactForm">
+                            <div class="form-group">
+                                <input type="text" id="contactName" placeholder="Your Name" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="email" id="contactEmail" placeholder="Your Email" required>
+                            </div>
+                            <div class="form-group">
+                                <textarea id="contactMessage" rows="4" placeholder="Your Message" required></textarea>
+                            </div>
+                            <button type="submit" class="submit-btn">Send Message</button>
+                        </form>
 
-                    <div class="social-links">
-                        <a href="https://www.linkedin.com/in/kishor-bala-g-a28a23257/" class="social-btn" target="_blank">
-                            <img src="assets/linkedimg.jpg" alt="LinkedIn" width="24" height="24" style="border-radius: 4px;"> LinkedIn
-                        </a>
-                        <a href="https://github.com/Kishor-bala" class="social-btn" target="_blank">
-                            <img src="assets/githubimg.svg" alt="GitHub" width="24" height="24"> GitHub
-                        </a>
-                        <a href="https://mail.google.com/mail/?view=cm&fs=1&to=kishorbala0003@gmail.com" class="social-btn" target="_blank">
-                            <img src="assets/gmailimg.webp" alt="Gmail" width="24" height="24"> Gmail
-                        </a>
+                        <div class="social-links">
+                            <a href="https://www.linkedin.com/in/kishor-bala-g-a28a23257/" class="social-btn" target="_blank">
+                                <img src="assets/linkedimg.jpg" alt="LinkedIn" width="24" height="24" style="border-radius: 4px;"> LinkedIn
+                            </a>
+                            <a href="https://github.com/Kishor-bala" class="social-btn" target="_blank">
+                                <img src="assets/githubimg.svg" alt="GitHub" width="24" height="24"> GitHub
+                            </a>
+                            <a href="https://mail.google.com/mail/?view=cm&fs=1&to=kishorbala0003@gmail.com" class="social-btn" target="_blank">
+                                <img src="assets/gmailimg.webp" alt="Gmail" width="24" height="24"> Gmail
+                            </a>
+                        </div>
                     </div>
+
+                    <!-- Success Overlay -->
+                    <div id="success-state" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; z-index: 10; text-align: center; opacity: 0; transition: opacity 0.5s ease; background: rgba(15, 23, 42, 0.4);">
+                        
+                        <style>
+                            .thick-checkmark {
+                                width: 100px;
+                                height: 100px;
+                                display: block;
+                                margin: 0 auto;
+                            }
+                            .tick-circle {
+                                stroke-dasharray: 260;
+                                stroke-dashoffset: 260;
+                                transform-origin: center;
+                                transform: rotate(-45deg); /* Start drawing from top left so it ends at the tick */
+                            }
+                            .tick-mark {
+                                stroke-dasharray: 120;
+                                stroke-dashoffset: 120;
+                            }
+                            .thick-checkmark.active .tick-circle {
+                                animation: drawCircle 0.6s ease-in-out forwards;
+                            }
+                            .thick-checkmark.active .tick-mark {
+                                animation: drawTick 0.4s ease-out 0.5s forwards;
+                            }
+                            @keyframes drawCircle {
+                                0% { stroke-dashoffset: 260; }
+                                100% { stroke-dashoffset: 0; }
+                            }
+                            @keyframes drawTick {
+                                0% { stroke-dashoffset: 120; }
+                                100% { stroke-dashoffset: 0; }
+                            }
+                        </style>
+
+                        <div class="success-animation">
+                            <svg class="thick-checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                                <defs>
+                                    <mask id="tick-mask">
+                                        <rect width="100" height="100" fill="white" />
+                                        <polyline points="25,50 45,70 85,20" fill="none" stroke="black" stroke-width="28" stroke-linecap="square" stroke-linejoin="miter" />
+                                    </mask>
+                                </defs>
+                                <circle class="tick-circle" cx="50" cy="50" r="40" fill="none" stroke="#00C800" stroke-width="12" mask="url(#tick-mask)" />
+                                <polyline class="tick-mark" fill="none" stroke="#00C800" stroke-width="14" points="25,50 45,70 85,20" stroke-linecap="square" stroke-linejoin="miter" />
+                            </svg>
+                        </div>
+                        <h3 style="color: var(--accent-green); margin-top: 1.5rem; font-family: var(--font-pixel); font-size: 1.5rem; text-shadow: 2px 2px 0px #000;">Message Sent!</h3>
+                        <p style="color: white; font-family: var(--font-sans); margin-top: 1rem; font-size: 1.1rem; text-shadow: 1px 1px 3px #000;">I will get back to you soon.</p>
+                    </div>
+
+                    <!-- EmailJS CDN -->
+                    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+                    <script>
+                        emailjs.init("7mrNc1g6FqjHvHIY2");
+
+                        function showSuccessAnimation() {
+                            const formState = document.getElementById('form-state');
+                            const successState = document.getElementById('success-state');
+                            
+                            // Fade out form
+                            formState.style.opacity = '0';
+                            formState.style.pointerEvents = 'none';
+                            
+                            setTimeout(() => {
+                                successState.style.display = 'flex';
+                                
+                                // Small delay to allow display: flex to apply before fading in
+                                setTimeout(() => {
+                                    successState.style.opacity = '1';
+                                    
+                                    // Trigger drawing animation
+                                    document.querySelector('.thick-checkmark').classList.add('active');
+                                }, 50);
+                                
+                                // Revert back after 4 seconds
+                                setTimeout(() => {
+                                    successState.style.opacity = '0';
+                                    document.querySelector('.thick-checkmark').classList.remove('active');
+                                    
+                                    setTimeout(() => {
+                                        successState.style.display = 'none';
+                                        formState.style.pointerEvents = 'auto';
+                                        formState.style.opacity = '1';
+                                    }, 500);
+                                }, 4000);
+                            }, 500); // Wait for form to fade out
+                        }
+
+                        document.getElementById('contactForm').addEventListener('submit', function(e) {
+                            e.preventDefault();
+                            
+                            const btn = this.querySelector('button[type="submit"]');
+                            const originalBtnText = btn.innerText;
+                            btn.innerText = 'Sending...';
+
+                            const templateParams = {
+                                from_name: document.getElementById('contactName').value,
+                                from_email: document.getElementById('contactEmail').value,
+                                message: document.getElementById('contactMessage').value,
+                                to_email: 'kishorbala003@gmail.com'
+                            };
+
+                            emailjs.send('service_igm2twn', 'template_x344umj', templateParams)
+                                .then(function(response) {
+                                   console.log('SUCCESS!', response.status, response.text);
+                                   showSuccessAnimation();
+                                   document.getElementById('contactForm').reset();
+                                   btn.innerText = originalBtnText;
+                                }, function(error) {
+                                   console.log('FAILED...', error);
+                                   // Still show the animation as requested by user if key fails
+                                   if (error.text && error.text.includes('The public key is required')) {
+                                       showSuccessAnimation(); 
+                                   } else {
+                                       alert('Failed to send the message. Please check the console for details.');
+                                   }
+                                   btn.innerText = originalBtnText;
+                                });
+                        });
+                    </script>
                 </div>
             </div>
         </section>
