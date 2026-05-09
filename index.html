@@ -260,11 +260,17 @@
                             const originalBtnText = btn.innerText;
                             btn.innerText = 'Sending...';
 
+                            const nameVal = document.getElementById('contactName').value;
+                            const emailVal = document.getElementById('contactEmail').value;
+                            const msgVal = document.getElementById('contactMessage').value;
+
+                            const combinedMessage = `Name: ${nameVal}\nEmail: ${emailVal}\n\nMessage:\n${msgVal}`;
+
                             const templateParams = {
-                                from_name: document.getElementById('contactName').value,
-                                from_email: document.getElementById('contactEmail').value,
-                                message: document.getElementById('contactMessage').value,
-                                to_email: 'kishorbala003@gmail.com'
+                                from_name: nameVal,
+                                from_email: emailVal,
+                                message: combinedMessage,
+                                to_email: 'kishorbala0003@gmail.com'
                             };
 
                             emailjs.send('service_igm2twn', 'template_x344umj', templateParams)
