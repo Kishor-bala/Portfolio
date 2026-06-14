@@ -10,8 +10,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Press+Start+2P&display=swap" rel="stylesheet">
     
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="assets/Formal photo.jpeg">
+
     <!-- Styles -->
-    <link rel="stylesheet" href="styles.css?v=10">
+    <link rel="stylesheet" href="styles.css?v=22">
 </head>
 <body>
 
@@ -22,10 +25,9 @@
     <!-- UI Overlay -->
     <main id="ui-layer">
         
-        <!-- Fixed Projects Header -->
-        <div id="projects-ui-wrapper" style="position: fixed; top: 15%; left: 0; opacity: 0; pointer-events: none; transition: opacity 0.5s ease; z-index: 999; width: 100vw; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+        <!-- Fixed Projects Header - sits at top, above the 15vh sticky cards -->
+        <div id="projects-ui-wrapper" style="position: fixed; top: 3%; left: 0; opacity: 0; pointer-events: none; transition: opacity 0.5s ease; z-index: 999; width: 100vw; display: flex; flex-direction: column; align-items: center; justify-content: center;">
             <h2><span class="icon">💻</span> My Projects</h2>
-            <p style="color: white; font-size: 1.5rem; text-shadow: 2px 2px 0px rgba(0,0,0,0.8); margin-top: 10px; font-family: var(--font-pixel);">learn | build | improve</p>
         </div>
 
         <section class="section hero" id="hero">
@@ -51,18 +53,21 @@
             <div class="content">
                 <h2><span class="icon">⚡</span> What I Do</h2>
                 <div class="cards-container">
-                    <div class="project-card">
+                    <div class="project-card cursor-target">
                         <div class="card-glow"></div>
+                        <div class="cursor-bracket-tl"></div><div class="cursor-bracket-tr"></div><div class="cursor-bracket-br"></div><div class="cursor-bracket-bl"></div>
                         <h3>Web Development</h3>
                         <p>Building highly interactive, performant, and cinematic web experiences using modern technologies like Three.js, React, and GSAP.</p>
                     </div>
-                    <div class="project-card">
+                    <div class="project-card cursor-target">
                         <div class="card-glow"></div>
+                        <div class="cursor-bracket-tl"></div><div class="cursor-bracket-tr"></div><div class="cursor-bracket-br"></div><div class="cursor-bracket-bl"></div>
                         <h3>Data Analytics</h3>
                         <p>Transforming complex datasets into clear, actionable insights through visualization and statistical analysis.</p>
                     </div>
-                    <div class="project-card">
+                    <div class="project-card cursor-target">
                         <div class="card-glow"></div>
+                        <div class="cursor-bracket-tl"></div><div class="cursor-bracket-tr"></div><div class="cursor-bracket-br"></div><div class="cursor-bracket-bl"></div>
                         <h3>Cloud Architecture</h3>
                         <p>Designing scalable, secure, and highly available backend systems deployed on modern cloud infrastructure.</p>
                     </div>
@@ -71,7 +76,7 @@
         </section>
 
         <section class="section skills" id="skills">
-            <div class="content" id="skills-ui-wrapper" style="position: fixed; top: 35%; left: 50%; transform: translate(-50%, -50%); opacity: 0; pointer-events: none; transition: opacity 0.5s ease; z-index: 100; width: 100%; max-width: 800px; text-align: center;">
+            <div class="content" id="skills-ui-wrapper" style="position: fixed; top: 35%; left: 50%; transform: translate(-50%, -50%); opacity: 0; pointer-events: none; z-index: 100; width: 100%; max-width: 800px; text-align: center;">
                 <h2><span class="icon">⚔️</span> My Skills</h2>
                 <div class="break-hint" id="break-hint" style="color: #ffaa00;">Hit to break blocks!</div>
                 <div id="skills-content">
@@ -82,49 +87,81 @@
         </section>
 
         <section class="section projects" id="projects">
-            <!-- 3D Tree will be rendered here. No UI containers needed. -->
+            <div class="projects-scroll-stack-container" id="projects-scroll-stack-container">
+                <div class="scroll-stack-inner">
+                    
+                    <div class="scroll-stack-card project-card cursor-target">
+                        <div class="card-glow"></div>
+                        <div class="cursor-bracket-tl"></div><div class="cursor-bracket-tr"></div><div class="cursor-bracket-br"></div><div class="cursor-bracket-bl"></div>
+                        <h3 class="pixel-title"><span class="icon">🗳️</span> E-Voting System</h3>
+                        <p class="tech-stack">Google Apps Script | Google Sheets | OTP Auth</p>
+                        <p class="project-desc">A secure electronic voting platform featuring Aadhaar & Voter ID authentication, real-time OTP verification, and spreadsheet database integrations for clean vote tracking.</p>
+                        <a href="https://github.com/Kishor-bala" target="_blank" class="pixel-link-btn">View ➜</a>
+                    </div>
+
+                    <div class="scroll-stack-card project-card cursor-target">
+                        <div class="card-glow"></div>
+                        <div class="cursor-bracket-tl"></div><div class="cursor-bracket-tr"></div><div class="cursor-bracket-br"></div><div class="cursor-bracket-bl"></div>
+                        <h3 class="pixel-title"><span class="icon">🤖</span> RAG AI Knowledge System</h3>
+                        <p class="tech-stack">Node.js | Qdrant | Gemini Embeddings</p>
+                        <p class="project-desc">An advanced semantic search knowledge base parsing documents into chunks, indexing vectors in Qdrant, and querying via Gemini 3.1 for friendly, accurate chatbot responses.</p>
+                        <a href="https://github.com/Kishor-bala" target="_blank" class="pixel-link-btn">View ➜</a>
+                    </div>
+
+                    <div class="scroll-stack-card project-card cursor-target">
+                        <div class="card-glow"></div>
+                        <div class="cursor-bracket-tl"></div><div class="cursor-bracket-tr"></div><div class="cursor-bracket-br"></div><div class="cursor-bracket-bl"></div>
+                        <h3 class="pixel-title"><span class="icon">🌾</span> Crop Yield & Lasak Admission</h3>
+                        <p class="tech-stack">Python | Machine Learning | Node.js</p>
+                        <p class="project-desc">An intelligent crop yield prediction system integrated with an automated online student admission portal for Lasak Technologies Portal.</p>
+                        <a href="https://github.com/Kishor-bala" target="_blank" class="pixel-link-btn">View ➜</a>
+                    </div>
+
+                    <div class="scroll-stack-card project-card cursor-target">
+                        <div class="card-glow"></div>
+                        <div class="cursor-bracket-tl"></div><div class="cursor-bracket-tr"></div><div class="cursor-bracket-br"></div><div class="cursor-bracket-bl"></div>
+                        <h3 class="pixel-title"><span class="icon">🏢</span> DoMoreTech Website</h3>
+                        <p class="tech-stack">HTML5 | CSS3 | Responsive JS</p>
+                        <p class="project-desc">A premium, clean corporate showcase platform and landing page designed for presenting DoMoreTech services, portfolios, and client engagement workflows.</p>
+                        <a href="https://github.com/Kishor-bala" target="_blank" class="pixel-link-btn">View ➜</a>
+                    </div>
+
+                    <div class="scroll-stack-card project-card cursor-target">
+                        <div class="card-glow"></div>
+                        <div class="cursor-bracket-tl"></div><div class="cursor-bracket-tr"></div><div class="cursor-bracket-br"></div><div class="cursor-bracket-bl"></div>
+                        <h3 class="pixel-title"><span class="icon">🌐</span> Portfolio Website</h3>
+                        <p class="tech-stack">Three.js | GSAP | HTML5 & CSS3</p>
+                        <p class="project-desc">A highly interactive Minecraft-themed WebGL portfolio showcasing skills as breakable blocks, custom floating island scenery, and an integrated RAG-powered chatbot.</p>
+                        <a href="https://github.com/Kishor-bala" target="_blank" class="pixel-link-btn">View ➜</a>
+                    </div>
+
+                    <!-- End element to release pins cleanly -->
+                    <div class="scroll-stack-end w-full h-px"></div>
+                </div>
+            </div>
         </section>
 
         <section class="section experience" id="experience">
             <div class="content">
                 <h2><span class="icon">🏆</span> Experience & Learning</h2>
                 <div class="cards-container">
-                    <div class="project-card">
+                    <div class="project-card cursor-target">
                         <div class="card-glow"></div>
+                        <div class="cursor-bracket-tl"></div><div class="cursor-bracket-tr"></div><div class="cursor-bracket-br"></div><div class="cursor-bracket-bl"></div>
                         <h3>DoMoreTech Internship</h3>
-                        <p>3 Months of hands-on practical development experience, handling client communications and business requirements.</p>
+                        <p>Hands-on web development experience, building corporate showcase platforms and designing custom workflows.</p>
                     </div>
-                    <div class="project-card">
+                    <div class="project-card cursor-target">
                         <div class="card-glow"></div>
+                        <div class="cursor-bracket-tl"></div><div class="cursor-bracket-tr"></div><div class="cursor-bracket-br"></div><div class="cursor-bracket-bl"></div>
+                        <h3>Lasak Technologies</h3>
+                        <p>AI & Web Dev Internship focusing on RAG systems, embeddings, vector databases, Redis, queues, rate-limiting, and n8n.</p>
+                    </div>
+                    <div class="project-card cursor-target">
+                        <div class="card-glow"></div>
+                        <div class="cursor-bracket-tl"></div><div class="cursor-bracket-tr"></div><div class="cursor-bracket-br"></div><div class="cursor-bracket-bl"></div>
                         <h3>Hackathons</h3>
-                        <p>Participated in intensive Hackathons, gaining crucial knowledge under pressure and collaborating with peers.</p>
-                    </div>
-                    <div class="project-card">
-                        <div class="card-glow"></div>
-                        <h3>Project Expo</h3>
-                        <p>Showcased my projects at the university Project Expo, presenting technical architectures to a large audience.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-
-
-        <section class="section faq" id="faq">
-            <div class="content">
-                <h2><span class="icon">❓</span> Frequently Asked Questions</h2>
-                <div class="accordion">
-                    <div class="accordion-item panel">
-                        <h3>Are you open to freelance work?</h3>
-                        <p>Yes, I am currently accepting freelance projects depending on my academic schedule.</p>
-                    </div>
-                    <div class="accordion-item panel mt-4">
-                        <h3>What is your preferred tech stack?</h3>
-                        <p>I specialize in JavaScript/TypeScript, Three.js, React, Node.js, and Python for data analysis.</p>
-                    </div>
-                    <div class="accordion-item panel mt-4">
-                        <h3>Where are you based?</h3>
-                        <p>I work remotely and am open to collaborating with teams worldwide.</p>
+                        <p>Participated in intensive hackathons, collaborating with peers to design and code solutions under pressure.</p>
                     </div>
                 </div>
             </div>
@@ -301,11 +338,55 @@
         </section>
 
 
-    </main>
+    <!-- Minecraft-themed Chatbot Widget -->
+    <div id="minecraft-chatbot-container" class="minecraft-chatbot-container">
+        <!-- Chat Toggle Button -->
+        <button id="chatbot-toggle-btn" class="chatbot-toggle-btn" aria-label="Open Assistant">
+            <span class="btn-icon">💬</span>
+        </button>
+
+        <!-- Chat Panel -->
+        <div id="chatbot-panel" class="chatbot-panel hidden" data-lenis-prevent>
+            <!-- Header -->
+            <div class="chatbot-header">
+                <div class="header-left">
+                    <span class="avatar-holder">
+                        <img src="assets/Formal photo.jpeg" alt="Kishor" class="pixel-avatar">
+                    </span>
+                    <h3 class="chatbot-title">Assistant</h3>
+                </div>
+                <button id="chatbot-close-btn" class="chatbot-close-btn">&times;</button>
+            </div>
+
+            <!-- Messages Logs -->
+            <div id="chatbot-messages" class="chatbot-messages">
+                <div class="message-wrapper assistant">
+                    <div class="message-bubble">
+                        Hi, I'm Kishor's Portfolio Assistant! Ask me anything about his projects, education, experience, or skills.
+                    </div>
+                </div>
+                <!-- Suggestions Chips -->
+                <div class="chatbot-suggestions" id="chatbot-suggestions">
+                    <button type="button" class="sug-chip" data-question="Who is Kishor Bala?">Who is Kishor?</button>
+                    <button type="button" class="sug-chip" data-question="What are his technical skills?">His Skills</button>
+                    <button type="button" class="sug-chip" data-question="Tell me about his recent projects.">Projects</button>
+                    <button type="button" class="sug-chip" data-question="How can I contact him?">Contact Info</button>
+                </div>
+            </div>
+
+            <!-- Input Box -->
+            <form id="chatbot-form" class="chatbot-form">
+                <div class="input-wrapper">
+                    <input type="text" id="chatbot-input" placeholder="Ask me something..." required autocomplete="off">
+                    <button type="submit" id="chatbot-send-btn" class="chatbot-send-btn">Send</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/lenis@1.1.20/dist/lenis.min.js"></script>
     
     <!-- Import Map for Three.js -->
     <script type="importmap">
@@ -316,6 +397,7 @@
             }
         }
     </script>
-    <script type="module" src="main.js?v=9"></script>
+    <script type="module" src="main.js?v=22"></script>
+    <script src="chatbot.js"></script>
 </body>
 </html>

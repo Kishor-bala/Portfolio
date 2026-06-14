@@ -10,6 +10,27 @@
     --font-sans: 'Inter', sans-serif;
 }
 
+/* Lenis smooth scrolling rules */
+html.lenis, html.lenis body {
+    height: auto;
+}
+
+.lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+    overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+    pointer-events: none;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -20,7 +41,8 @@ body {
     background-color: transparent;
     color: var(--text-main);
     font-family: var(--font-sans);
-    overflow-x: hidden;
+    /* clip instead of hidden — hidden creates a scroll container that breaks position:sticky */
+    overflow-x: clip;
 }
 
 body.axe-cursor {
@@ -79,6 +101,23 @@ body.axe-cursor {
     padding: 0 10%;
 }
 
+/* Projects section: block layout so sticky inner fills from section top */
+.section.projects {
+    display: block;
+    padding: 0;
+    align-items: initial;
+}
+
+/* Experience & Contact: fade-in transitions */
+#experience {
+    min-height: 200vh;
+    transition: opacity 0.7s ease;
+}
+
+#contact {
+    transition: opacity 0.7s ease;
+}
+
 .section.skills {
     align-items: center; /* Center vertically */
     justify-content: center;
@@ -134,11 +173,9 @@ strong {
     color: var(--text-main);
 }
 
-/* Panel Style (Glassmorphism) */
+/* Panel Style (Glassmorphism) - High-performance hardware accelerated fallback for 200fps */
 .panel {
-    background: linear-gradient(135deg, rgba(15, 23, 42, 0.7) 0%, rgba(30, 41, 59, 0.4) 100%);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.94) 0%, rgba(30, 41, 59, 0.88) 100%);
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-top: 1px solid rgba(255, 255, 255, 0.3);
     border-left: 1px solid rgba(255, 255, 255, 0.3);
@@ -146,6 +183,8 @@ strong {
     border-radius: 20px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
     transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease, border-color 0.4s ease;
+    will-change: transform, box-shadow, border-color;
+    transform: translate3d(0, 0, 0);
 }
 
 .panel:hover {
@@ -262,10 +301,9 @@ strong {
     margin-top: 1rem;
     padding: 20px;
     border: 1px solid rgba(139, 92, 246, 0.5); /* Faint purple border */
-    background: rgba(30, 41, 59, 0.3); /* Transparent dark background */
+    background: rgba(30, 41, 59, 0.82); /* Opaque background for readability without filter */
     border-radius: 8px;
     min-height: 100px;
-    backdrop-filter: blur(4px);
 }
 
 #active-skill-label .duration {
@@ -314,9 +352,7 @@ strong {
 }
 
 .project-card {
-    background: linear-gradient(135deg, rgba(15, 23, 42, 0.7) 0%, rgba(30, 41, 59, 0.4) 100%);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.94) 0%, rgba(30, 41, 59, 0.88) 100%);
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-top: 1px solid rgba(255, 255, 255, 0.3);
     border-left: 1px solid rgba(255, 255, 255, 0.3);
@@ -332,12 +368,39 @@ strong {
     justify-content: center;
     align-items: center;
     text-align: center;
+    will-change: transform, box-shadow, border-color;
+    transform: translate3d(0, 0, 0);
 }
 
 .project-card:hover {
-    transform: translateY(-10px) scale(1.02);
     border-color: rgba(139, 92, 246, 0.6);
     box-shadow: 0 25px 50px rgba(0,0,0,0.8);
+}
+
+/* Floating animation specifically for What I Do cards */
+.services .project-card {
+    animation: card-float 4s ease-in-out infinite;
+}
+.services .project-card:nth-child(1) {
+    animation-delay: 0s;
+}
+.services .project-card:nth-child(2) {
+    animation-delay: 0.8s;
+}
+.services .project-card:nth-child(3) {
+    animation-delay: 1.6s;
+}
+
+.services .project-card:hover {
+    animation: none;
+    transform: translateY(-12px) scale(1.02);
+    border-color: rgba(16, 185, 129, 0.6);
+}
+
+@keyframes card-float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+    100% { transform: translateY(0px); }
 }
 
 .card-glow {
@@ -733,4 +796,685 @@ strong {
         font-size: 0.75rem !important;
         justify-content: center;
     }
+}
+
+/* ==========================================================================
+   MINECRAFT THEMED PORTFOLIO ASSISTANT
+   ========================================================================== */
+
+.minecraft-chatbot-container {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 99999;
+    font-family: var(--font-sans);
+    pointer-events: auto; /* Allow interaction */
+}
+
+/* Floating animation only when chat panel is hidden */
+.minecraft-chatbot-container:has(.chatbot-panel.hidden) {
+    animation: chatbot-float 3s ease-in-out infinite;
+}
+
+@keyframes chatbot-float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+    100% { transform: translateY(0px); }
+}
+
+/* Chat Toggle Button - Styled like a Minecraft Gold Block for high contrast */
+.chatbot-toggle-btn {
+    width: 60px;
+    height: 60px;
+    background-color: #fbbf24; /* Minecraft Gold */
+    border: 4px solid #000;
+    border-top-color: #fef08a; /* Light Gold highlight */
+    border-left-color: #fef08a;
+    border-right-color: #b45309; /* Dark Gold shadow */
+    border-bottom-color: #b45309;
+    box-shadow: 0 5px 20px rgba(251, 191, 36, 0.5); /* Gold glow */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.8rem;
+    transition: all 0.1s ease;
+}
+
+.chatbot-toggle-btn:hover {
+    background-color: #10b981; /* Shift to Emerald Green on hover! */
+    border-top-color: #34d399;
+    border-left-color: #34d399;
+    border-right-color: #047857;
+    border-bottom-color: #047857;
+    box-shadow: 0 5px 20px rgba(16, 185, 129, 0.5); /* Emerald glow */
+    transform: translateY(-2px);
+    color: #ffff00;
+}
+
+.chatbot-toggle-btn:active {
+    transform: translateY(1px);
+    border-top-color: #373737;
+    border-left-color: #373737;
+    border-right-color: #8b8b8b;
+    border-bottom-color: #8b8b8b;
+}
+
+/* Chat Panel - Minecraft GUI Slate Theme */
+.chatbot-panel {
+    position: absolute;
+    bottom: 75px;
+    right: 0;
+    width: 380px;
+    height: 500px;
+    background-color: #1e1e1e;
+    border: 4px solid #000;
+    border-top-color: #3c3c3c;
+    border-left-color: #3c3c3c;
+    border-right-color: #111111;
+    border-bottom-color: #111111;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    overscroll-behavior: contain; /* Prevent scroll chaining to the main page */
+    transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+.chatbot-panel.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.95) translateY(15px);
+}
+
+/* Panel Header - Dark Slate Menu Title Bar */
+.chatbot-header {
+    background-color: #2e2e2e;
+    border-bottom: 4px solid #000;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.chatbot-header .header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.avatar-holder {
+    width: 34px;
+    height: 34px;
+    border: 2px solid #000;
+    background-color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.pixel-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.chatbot-title {
+    font-family: var(--font-pixel);
+    font-size: 0.75rem;
+    color: #ffffff;
+    text-shadow: 2px 2px 0px #000;
+    letter-spacing: 1px;
+}
+
+.chatbot-close-btn {
+    background-color: #ae1818;
+    color: #ffffff;
+    border: 2px solid #000;
+    border-top-color: #d63e3e;
+    border-left-color: #d63e3e;
+    border-right-color: #6d1010;
+    border-bottom-color: #6d1010;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.chatbot-close-btn:hover {
+    background-color: #c92222;
+    border-top-color: #e65c5c;
+    border-left-color: #e65c5c;
+    color: #ffff00;
+}
+
+.chatbot-close-btn:active {
+    border-top-color: #6d1010;
+    border-left-color: #6d1010;
+    border-right-color: #e65c5c;
+    border-bottom-color: #e65c5c;
+}
+
+/* Chat Messages Panel */
+.chatbot-messages {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    background-color: rgba(0, 0, 0, 0.4);
+    overscroll-behavior: contain; /* Prevent scroll chaining natively */
+}
+
+/* Inset Pixel scrollbar for chat logs */
+.chatbot-messages::-webkit-scrollbar {
+    width: 8px;
+}
+.chatbot-messages::-webkit-scrollbar-track {
+    background: #111111;
+}
+.chatbot-messages::-webkit-scrollbar-thumb {
+    background: #444444;
+    border: 2px solid #111111;
+}
+.chatbot-messages::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-green);
+}
+
+/* Messages Wrapper & Bubbles */
+.message-wrapper {
+    display: flex;
+    width: 100%;
+}
+
+.message-wrapper.user {
+    justify-content: flex-end;
+}
+
+.message-wrapper.assistant {
+    justify-content: flex-start;
+}
+
+.message-bubble {
+    max-width: 85%;
+    padding: 10px 14px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    word-break: break-word;
+    border: 3px solid #000;
+    border-radius: 2px;
+    color: #ffffff;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+}
+
+.message-wrapper.user .message-bubble {
+    background-color: #2b4970; /* Pixel lapis blue theme */
+    border-top-color: #4b74a3;
+    border-left-color: #4b74a3;
+    border-right-color: #17273d;
+    border-bottom-color: #17273d;
+}
+
+.message-wrapper.assistant .message-bubble {
+    background-color: #2c2c2c; /* Pixel stone gray theme */
+    border-top-color: #4c4c4c;
+    border-left-color: #4c4c4c;
+    border-right-color: #1c1c1c;
+    border-bottom-color: #1c1c1c;
+    border-left-width: 6px; /* Thick left accent */
+    border-left-color: var(--accent-green);
+}
+
+.message-bubble strong {
+    color: #ffff00; /* Yellow highlight for bold text */
+}
+
+.message-bubble a {
+    color: #55ff55; /* Light green for links */
+    text-decoration: underline;
+    font-weight: bold;
+}
+
+.message-bubble a:hover {
+    color: #ffff55;
+}
+
+.message-bubble ul, .message-bubble ol {
+    margin-left: 18px;
+    margin-top: 6px;
+    margin-bottom: 6px;
+}
+
+.message-bubble li {
+    margin-bottom: 4px;
+}
+
+.error-msg {
+    color: #ff5555;
+    font-weight: bold;
+}
+
+/* Minecraft Suggestion Chips - Vertical buttons stacking at bottom of log */
+.chatbot-suggestions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+    width: 100%;
+}
+
+.sug-chip {
+    background-color: #3a3a3a;
+    border: 3px solid #000;
+    border-top-color: #5e5e5e;
+    border-left-color: #5e5e5e;
+    border-right-color: #222222;
+    border-bottom-color: #222222;
+    color: #ffffff;
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    font-weight: bold;
+    text-shadow: 1px 1px 1px #000;
+    text-align: left;
+    padding: 8px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.1s ease;
+}
+
+.sug-chip .icon {
+    color: var(--accent-green);
+    font-family: var(--font-pixel);
+    font-size: 0.75rem;
+}
+
+.sug-chip:hover {
+    background-color: #4e4e4e;
+    border-top-color: #727272;
+    border-left-color: #727272;
+    color: #ffff00;
+}
+
+.sug-chip:active {
+    transform: translateY(1px);
+    border-top-color: #222222;
+    border-left-color: #222222;
+    border-right-color: #5e5e5e;
+    border-bottom-color: #5e5e5e;
+}
+
+/* Chat Input Bar Form */
+.chatbot-form {
+    background-color: #2a2a2a;
+    border-top: 4px solid #000;
+    padding: 12px;
+}
+
+.chatbot-form .input-wrapper {
+    display: flex;
+    gap: 8px;
+}
+
+#chatbot-input {
+    flex-grow: 1;
+    background-color: #000000;
+    border: 3px solid #000;
+    border-top-color: #181818;
+    border-left-color: #181818;
+    border-right-color: #4a4a4a;
+    border-bottom-color: #4a4a4a;
+    color: #ffffff;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    outline: none;
+    font-family: var(--font-sans);
+}
+
+#chatbot-input:focus {
+    border-color: var(--accent-green);
+}
+
+.chatbot-send-btn {
+    background-color: #5c5c5c;
+    border: 3px solid #000;
+    border-top-color: #8b8b8b;
+    border-left-color: #8b8b8b;
+    border-right-color: #373737;
+    border-bottom-color: #373737;
+    color: #ffffff;
+    font-family: var(--font-pixel);
+    font-size: 0.65rem;
+    padding: 8px 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-shadow: 1px 1px 0px #000;
+}
+
+.chatbot-send-btn:hover {
+    background-color: #6e6e6e;
+    color: #ffff00;
+    border-top-color: #9b9b9b;
+    border-left-color: #9b9b9b;
+}
+
+.chatbot-send-btn:active {
+    transform: translateY(1px);
+    border-top-color: #373737;
+    border-left-color: #373737;
+    border-right-color: #8b8b8b;
+    border-bottom-color: #8b8b8b;
+}
+
+/* Typing Indicator Loading Spinner (CSS Spinner Only) */
+.typing-indicator-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 10px;
+    min-height: 20px;
+}
+
+.minecraft-spinner {
+    width: 22px;
+    height: 22px;
+    border: 3px solid rgba(255, 255, 255, 0.15);
+    border-top-color: var(--accent-green);
+    border-radius: 50%;
+    animation: spinner-spin 0.85s linear infinite;
+}
+
+@keyframes spinner-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive Styles for Mobile */
+@media (max-width: 768px) {
+    .minecraft-chatbot-container {
+        bottom: 20px;
+        right: 20px;
+    }
+    
+    .chatbot-toggle-btn {
+        width: 54px;
+        height: 54px;
+        font-size: 1.5rem;
+    }
+    
+    .chatbot-panel {
+        bottom: 66px;
+        width: calc(100vw - 40px);
+        max-width: 380px;
+    }
+}
+
+/* CSS Vignette Overlay - Replaces expensive WebGL Post-processing pass */
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    background: radial-gradient(circle, transparent 40%, rgba(0, 0, 0, 0.45) 100%);
+    z-index: 1; /* Above canvas (0) but below UI (10) */
+}
+
+/* Custom snapping target cursor */
+body.has-custom-cursor {
+    cursor: none !important;
+}
+body.has-custom-cursor a,
+body.has-custom-cursor button,
+body.has-custom-cursor input,
+body.has-custom-cursor textarea,
+body.has-custom-cursor .cursor-target {
+    cursor: none !important;
+}
+
+.target-cursor-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+    z-index: 99999;
+    will-change: transform;
+}
+
+.target-cursor-dot {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 4px;
+    height: 4px;
+    background-color: #ffffff;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    will-change: transform;
+}
+
+.target-cursor-corner {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border: 3px solid #ffffff;
+    will-change: transform;
+    top: 50%;
+    left: 50%;
+    margin: 0;
+}
+
+/* Specific borders for corners */
+.target-cursor-corner.tc-tl {
+    border-right: none !important;
+    border-bottom: none !important;
+}
+.target-cursor-corner.tc-tr {
+    border-left: none !important;
+    border-bottom: none !important;
+}
+.target-cursor-corner.tc-br {
+    border-left: none !important;
+    border-top: none !important;
+}
+.target-cursor-corner.tc-bl {
+    border-right: none !important;
+    border-top: none !important;
+}
+
+/* ================================================================
+   PROJECTS SCROLL STACK - Single sticky viewport container
+   Cards are absolutely centred inside it; overflow:hidden prevents
+   any card from peeking outside the viewport window.
+   ================================================================ */
+
+/* The full-height wrapper just provides scroll-space */
+.projects-scroll-stack-container {
+    width: 100%;
+    height: 100%;
+}
+
+/* The ONE scroll wrapper — all cards live inside this in normal document flow */
+.scroll-stack-inner {
+    position: relative;
+    width: 100%;
+    padding-top: 20vh;
+    padding-bottom: 75vh; /* Large padding-bottom allows last card to stack and scroll out cleanly */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Cards are relatively positioned and layout in normal flow. JS handles translate and scale pinning. */
+.scroll-stack-card.project-card {
+    position: sticky !important;
+    width: min(700px, 90vw);
+    height: 320px;
+    margin: 80px auto !important;
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    text-align: left;
+    box-sizing: border-box;
+    transform-origin: top center;
+    will-change: transform, filter;
+    backface-visibility: hidden;
+    transform-style: preserve-3d;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.96) 0%, rgba(30, 41, 59, 0.92) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    border-left: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 40px; /* 40px rounded corners as configured in the requested animation */
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+    transition: transform 0s linear, border-color 0.4s ease, box-shadow 0.4s ease !important;
+}
+
+.scroll-stack-card.project-card h3 {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.scroll-stack-card.project-card .project-desc {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: #cbd5e1;
+    margin-bottom: 1.5rem;
+}
+
+/* Pixel Link Button (Retro Style) */
+.pixel-link-btn {
+    display: inline-block;
+    margin-top: auto;
+    padding: 0.8rem 1.5rem;
+    font-family: var(--font-pixel);
+    font-size: 0.75rem;
+    color: #000 !important;
+    background-color: var(--accent-green);
+    border: 3px solid #000;
+    border-top-color: #34d399;
+    border-left-color: #34d399;
+    border-right-color: #047857;
+    border-bottom-color: #047857;
+    text-decoration: none;
+    box-shadow: 0 4px 0px #000;
+    transition: all 0.1s ease;
+    cursor: pointer;
+    z-index: 10;
+    position: relative;
+}
+
+.pixel-link-btn:hover {
+    background-color: #fbbf24;
+    border-top-color: #fef08a;
+    border-left-color: #fef08a;
+    border-right-color: #b45309;
+    border-bottom-color: #b45309;
+    transform: translateY(2px);
+    box-shadow: 0 2px 0px #000;
+}
+
+.pixel-link-btn:active {
+    transform: translateY(4px);
+    box-shadow: none;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .scroll-stack-card.project-card {
+        padding: 1.8rem;
+        border-radius: 16px;
+        width: 92vw;
+    }
+    .scroll-stack-card.project-card h3 {
+        font-size: 1.3rem;
+    }
+    .scroll-stack-card.project-card .project-desc {
+        font-size: 0.9rem;
+        margin-bottom: 1.2rem;
+    }
+    .pixel-link-btn {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.65rem;
+    }
+}
+
+/* Projects section — 4 cards × 80vh each + 20vh padding */
+#projects {
+    min-height: 340vh;
+    position: relative;
+    width: 100%;
+}
+
+/* ================================================================
+   CUSTOM CURSOR HOVER EFFECT (cards only, no cursor hiding)
+   ================================================================ */
+
+/* Card hover bracket overlay — absolutely positioned on the card */
+.cursor-target {
+    position: relative;
+}
+
+.cursor-bracket-tl,
+.cursor-bracket-tr,
+.cursor-bracket-br,
+.cursor-bracket-bl {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border: 3px solid var(--accent-green);
+    opacity: 0;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    pointer-events: none;
+    z-index: 100;
+}
+
+.cursor-bracket-tl {
+    top: 10px; left: 10px;
+    border-right: none;
+    border-bottom: none;
+    transform: translate(-4px, -4px);
+}
+.cursor-bracket-tr {
+    top: 10px; right: 10px;
+    border-left: none;
+    border-bottom: none;
+    transform: translate(4px, -4px);
+}
+.cursor-bracket-br {
+    bottom: 10px; right: 10px;
+    border-left: none;
+    border-top: none;
+    transform: translate(4px, 4px);
+}
+.cursor-bracket-bl {
+    bottom: 10px; left: 10px;
+    border-right: none;
+    border-top: none;
+    transform: translate(-4px, 4px);
+}
+
+.cursor-target:hover .cursor-bracket-tl,
+.cursor-target:hover .cursor-bracket-tr,
+.cursor-target:hover .cursor-bracket-br,
+.cursor-target:hover .cursor-bracket-bl {
+    opacity: 1;
+    transform: translate(0, 0);
 }

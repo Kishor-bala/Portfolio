@@ -5,10 +5,9 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { VignetteShader } from 'three/addons/shaders/VignetteShader.js';
 import { GammaCorrectionShader } from 'three/addons/shaders/GammaCorrectionShader.js';
-import { SSAOPass } from 'three/addons/postprocessing/SSAOPass.js';
 
 // === GLOBALS ===
-let canvas, scene, camera, renderer, composer;
+let canvas, scene, camera, renderer, composer, tl;
 let meshes = {};
 let maxCounts = {};
 let blocksGroup;
@@ -21,8 +20,7 @@ let clickBoxesInstruction;
 const breakableBlocks = [];
 const skillsList = ["Python", "Java", "C++", "HTML", "DBMS", "Web Development", "Cloud-Computing"];
 let skillsRevealed = 0;
-let scrollLocked = false;
-let lockScrollY = 0;
+let isScrollLocked = false;
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
 // Mobs & Particles
@@ -69,24 +67,49 @@ document.addEventListener("DOMContentLoaded", typeEffect);
 const maxGrass = 10000, maxDirt = 8000, maxWood = 4000, maxLeaves = 8000, maxSandstone = 4000;
 
 function init() {
+    if (history.scrollRestoration) {
+        history.scrollRestoration = 'manual';
+    }
+    window.scrollTo(0, 0);
+
     setupScene();
     setupLights();
     createWorld();
     createSpecialScenes();
-    setupPostProcessing();
+    // setupPostProcessing(); // Disabled for 120fps performance boost
     setupScrollAnimation();
     setupInteractions();
-    
-    // Scroll Lock Listener
+
+    // Initialize Lenis, ScrollStack, and Custom Snapping Cursor
+    initLenis();
+    initScrollStack();
+    setupTargetCursor();
+
+    // Scroll Lock until all Skills blocks are broken
     window.addEventListener('scroll', () => {
-        if (scrollLocked && window.scrollY > lockScrollY) {
-            window.scrollTo(0, lockScrollY);
+        if (skillsRevealed < skillsList.length) {
+            const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+            // Lock at t = 3.3 in camera timeline (where blocks are in view)
+            const skillsLockScrollY = Math.round((3.3 / 10) * maxScroll);
+            if (window.scrollY >= skillsLockScrollY) {
+                isScrollLocked = true;
+                window.scrollTo(0, skillsLockScrollY);
+                if (lenisInstance) {
+                    lenisInstance.stop();
+                    lenisInstance.scrollTo(skillsLockScrollY, { immediate: true });
+                }
+            }
         }
     }, { passive: false });
 
-    window.addEventListener('resize', onWindowResize);
+    window.addEventListener('resize', () => {
+        onWindowResize();
+        cacheScrollStackPositions();
+    });
     animate();
 }
+
+
 
 function setupScene() {
     canvas = document.querySelector('#bg-canvas');
@@ -113,8 +136,8 @@ function setupLights() {
     dirLight = new THREE.DirectionalLight(0xfff5b6, 2.5);
     dirLight.position.set(50, 100, 50);
     dirLight.castShadow = true;
-    dirLight.shadow.mapSize.width = 2048;
-    dirLight.shadow.mapSize.height = 2048;
+    dirLight.shadow.mapSize.width = 1024;  // Reduced from 2048 for major WebGL FPS boost (towards 200fps)
+    dirLight.shadow.mapSize.height = 1024;
     dirLight.shadow.camera.near = 0.5;
     dirLight.shadow.camera.far = 300;
     const d = 100;
@@ -129,12 +152,6 @@ function setupPostProcessing() {
     composer = new EffectComposer(renderer);
     const renderPass = new RenderPass(scene, camera);
     composer.addPass(renderPass);
-
-    const ssaoPass = new SSAOPass(scene, camera, window.innerWidth, window.innerHeight);
-    ssaoPass.kernelRadius = 16;
-    ssaoPass.minDistance = 0.005;
-    ssaoPass.maxDistance = 0.1;
-    composer.addPass(ssaoPass);
 
     const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.0, 0.4, 0.85);
     composer.addPass(bloomPass);
@@ -398,58 +415,9 @@ function createSpecialScenes() {
         return sprite;
     }
 
-    // 2. The 4 Project Plants (Horizontal row perfectly parallel to camera at X=-38)
-    const projectTexts = ["E-Voting system", "LMS Platform", "Websites", "Crop Prediction Tool"];
-    projectTexts.forEach((p, i) => {
-        let px = -45;
-        let py = 0;
-        let pz;
-        
-        if (isMobile) {
-            // Zig-Zag Staggered Layout for Mobile
-            py = (i % 2 === 0) ? 3 : 0; // Alternate between elevated and ground
-            pz = -15.5 - (i * 3); // Spaced evenly in Z
-        } else {
-            pz = -15.5 - (i * 3);
-        }
+    // Project plants removed - projects are now shown via HTML scroll-stack cards
 
-        const matDirt = new THREE.MeshStandardMaterial({ color: 0x5c4033, roughness: 1.0 });
-        
-        // Build dirt pillar if elevated
-        if (isMobile && py > 0) {
-            for (let y = 0; y < py; y++) {
-                const dirtCol = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), matDirt);
-                dirtCol.position.set(px, y, pz);
-                dirtCol.castShadow = true;
-                scene.add(dirtCol);
-            }
-        }
 
-        // Dirt base (pot)
-        const dirt = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), matDirt);
-        dirt.position.set(px, py, pz);
-        dirt.castShadow = true;
-        scene.add(dirt);
-
-        // Leaves top (plant)
-        const matLeaves = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.9 });
-        const leaves = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.2, 1.2), matLeaves);
-        leaves.position.set(px, py + 1, pz);
-        leaves.castShadow = true;
-        scene.add(leaves);
-
-        // Project text floating exactly in front/above the plant
-        const sprite = createProjectSprite(p);
-        if (isMobile) {
-            sprite.scale.set(5.5, 1.375, 1);
-            // Pull text slightly forward in X to avoid clipping into neighboring pillars
-            sprite.position.set(px + 1.5, py + 2.5, pz);
-        } else {
-            sprite.scale.set(2.8, 0.7, 1);
-            sprite.position.set(px, py + 2.5, pz);
-        }
-        scene.add(sprite);
-    });
 
     // 3. Connect With Me House (Red & Silver, Evening, X = -80, Z = -80)
     const matRed = new THREE.MeshStandardMaterial({ color: 0xaa2222, roughness: 0.8 });
@@ -535,155 +503,40 @@ function playCrunchSound() {
 
 function setupScrollAnimation() {
     const isMobile = window.innerWidth <= 768;
-    const tl = gsap.timeline({
-        scrollTrigger: {
-            trigger: "body",
-            start: "top top",
-            end: "bottom bottom",
-            scrub: true, // removes lag, strictly syncs HTML and 3D
-            onUpdate: (self) => {
-                const t = tl.time();
-                
-                // UI Visibility for Skills (Rest at 2.5 - 3.0)
-                const uiWrapper = document.getElementById('skills-ui-wrapper');
-                if (uiWrapper) {
-                    if (t >= 2.5 && t < 3.0) {
-                        if (uiWrapper.style.opacity !== '1') {
-                            uiWrapper.style.opacity = '1';
-                            uiWrapper.style.pointerEvents = 'auto';
-                            document.body.classList.add('axe-cursor');
-                            const customCursor = document.getElementById('custom-axe-cursor');
-                            if(customCursor) customCursor.style.display = 'block';
-                            isAxeEquipped = true;
-                        }
-                    } else {
-                        if (uiWrapper.style.opacity !== '0') {
-                            uiWrapper.style.opacity = '0';
-                            uiWrapper.style.pointerEvents = 'none';
-                            document.body.classList.remove('axe-cursor');
-                            const customCursor = document.getElementById('custom-axe-cursor');
-                            if(customCursor) customCursor.style.display = 'none';
-                            isAxeEquipped = false;
-                        }
-                    }
-                }
-
-                // Hide the 'services' HTML section to prevent overlap with the fixed Skills UI
-                const servicesSec = document.getElementById('services');
-                if (servicesSec) {
-                    if (t > 2.1) {
-                        servicesSec.style.opacity = '0';
-                        servicesSec.style.pointerEvents = 'none';
-                    } else {
-                        servicesSec.style.opacity = '1';
-                        servicesSec.style.pointerEvents = 'auto';
-                    }
-                }
-
-                // Scroll Lock Enforcer at Skills
-                if (skillsRevealed < skillsList.length) {
-                    if (t >= 2.5 && t < 2.6 && self.direction === 1) {
-                        if (!scrollLocked) {
-                            scrollLocked = true;
-                            lockScrollY = window.scrollY;
-                        }
-                    } else if (t < 2.4) {
-                        scrollLocked = false;
-                    }
-                } else {
-                    scrollLocked = false;
-                }
-
-                // UI Visibility for Projects (Rest at 3.5 - 4.0)
-                const projectsWrapper = document.getElementById('projects-ui-wrapper');
-                if (projectsWrapper) {
-                    if (t >= 3.5 && t < 4.0) { 
-                        if (projectsWrapper.style.opacity !== '1') {
-                            projectsWrapper.style.opacity = '1';
-                        }
-                    } else {
-                        if (projectsWrapper.style.opacity !== '0') {
-                            projectsWrapper.style.opacity = '0';
-                        }
-                    }
-                }
-
-                // Ensure Experience section only appears when its 3D section is active (Rest at 4.5 - 5.0)
-                const expSection = document.getElementById('experience');
-                if (expSection) {
-                    if (t >= 4.1 && t < 5.5) {
-                        expSection.style.opacity = '1';
-                        expSection.style.pointerEvents = 'auto';
-                    } else {
-                        expSection.style.opacity = '0';
-                        expSection.style.pointerEvents = 'none';
-                    }
-                }
-
-                // UI Visibility for FAQ (Rest at 5.5 - 6.0)
-                const faqSection = document.getElementById('faq');
-                if (faqSection) {
-                    if (t >= 5.1 && t < 6.5) {
-                        faqSection.style.opacity = '1';
-                        faqSection.style.pointerEvents = 'auto';
-                    } else {
-                        faqSection.style.opacity = '0';
-                        faqSection.style.pointerEvents = 'none';
-                    }
-                }
-
-                // UI Visibility for Contact (Rest at 6.5 - 7.5)
-                const contactSection = document.getElementById('contact');
-                if (contactSection) {
-                    if (t >= 6.1) {
-                        contactSection.style.opacity = '1';
-                        contactSection.style.pointerEvents = 'auto';
-                    } else {
-                        contactSection.style.opacity = '0';
-                        contactSection.style.pointerEvents = 'none';
-                    }
-                }
-            }
-        }
-    });
+    tl = gsap.timeline({ paused: true, defaults: { ease: 'none' } });
 
     const skyColor = { r: 135/255, g: 206/255, b: 235/255 }; 
     const sunsetColor = { r: 255/255, g: 100/255, b: 20/255 }; 
 
-    // TIMELINE: 0.5s movement, 0.5s rest per section. 8 sections total = max time 7.5s.
-    
-    // 0 -> 1: Hero -> About
-    tl.to(camera.position, { z: 5, y: 2, x: 0, duration: 0.5 }, 0)
-      .to(camera.rotation, { x: 0, duration: 0.5 }, 0);
+    // Hero -> About (0.0 to 1.06)
+    tl.to(camera.position, { z: 5, y: 2, x: 0, duration: 1.06 }, 0)
+      .to(camera.rotation, { x: 0, y: 0, z: 0, duration: 1.06 }, 0);
 
-    // 1 -> 2: About -> What I Do
-    tl.to(camera.position, { z: -10, y: 2, x: 0, duration: 0.5 }, 1);
+    // About -> What I Do (1.60 to 2.13)
+    tl.to(camera.position, { z: -10, y: 2, x: 0, duration: 0.53 }, 1.60);
 
-    // 2 -> 3: What I Do -> Skills
-    tl.to(camera.rotation, { y: Math.PI / 2, duration: 0.5 }, 2)
-      .to(camera.position, { x: isMobile ? 6 : -2, duration: 0.5 }, 2); 
+    // What I Do -> Skills (2.66 to 3.19)
+    tl.to(camera.rotation, { y: Math.PI / 2, duration: 0.53 }, 2.66)
+      .to(camera.position, { x: isMobile ? 6 : -2, duration: 0.53 }, 2.66); 
 
-    // 3 -> 4: Skills -> Projects
-    tl.to(camera.position, { x: isMobile ? -28 : -38, z: -20, duration: 0.5 }, 3);
+    // Skills -> Projects (3.72 to 4.26)
+    tl.to(camera.position, { x: isMobile ? -30 : -41, z: -20, duration: 0.54 }, 3.72);
 
-    // 4 -> 5: Projects -> Experience (Turn Right 90deg, go Straight -Z)
-    tl.to(camera.rotation, { y: 0, duration: 0.5 }, 4)
-      .to(camera.position, { z: -60, x: -50, duration: 0.5 }, 4);
+    // Projects -> Experience (7.45 to 8.30)
+    tl.to(camera.rotation, { y: 0, duration: 0.85 }, 7.45)
+      .to(camera.position, { z: -60, x: -50, duration: 0.85 }, 7.45);
 
-    // 5 -> 6: Experience -> FAQ
-    tl.to(camera.position, { z: -70, x: -50, duration: 0.5 }, 5);
-
-    // 6 -> 7: FAQ -> Connect (Sunset)
-    tl.to(camera.rotation, { y: Math.PI / 2, duration: 0.5 }, 6)
-      .to(camera.position, { x: -65, z: -72, duration: 0.5 }, 6)
-      .to(dirLight.position, { x: -100, y: 5, z: -100 }, 6) // Sunset angle
-      .to(dirLight, { intensity: 1.5 }, 6)
-      .to(skyColor, { r: sunsetColor.r, g: sunsetColor.g, b: sunsetColor.b, 
+    // Experience -> Contact (9.15 to 10.0)
+    tl.to(camera.rotation, { y: Math.PI / 2, duration: 0.85 }, 9.15)
+      .to(camera.position, { x: -65, z: -72, duration: 0.85 }, 9.15)
+      .to(dirLight.position, { x: -100, y: 5, z: -100, duration: 0.85 }, 9.15) // Sunset angle
+      .to(dirLight, { intensity: 1.5, duration: 0.85 }, 9.15)
+      .to(skyColor, { r: sunsetColor.r, g: sunsetColor.g, b: sunsetColor.b, duration: 0.85,
             onUpdate: () => { 
                 scene.background.setRGB(skyColor.r, skyColor.g, skyColor.b); 
                 scene.fog.color.setRGB(skyColor.r, skyColor.g, skyColor.b);
             }
-      }, 6);
+      }, 9.15);
 }
 
 function setupInteractions() {
@@ -738,9 +591,12 @@ function setupInteractions() {
             
             // Set hint text dynamically as we break blocks
             if (skillsRevealed >= skillsList.length) {
-                scrollLocked = false;
                 document.getElementById('break-hint').innerHTML = "All skills revealed! Keep scrolling.";
                 document.getElementById('break-hint').style.color = "#55ff55";
+                isScrollLocked = false;
+                if (lenisInstance) {
+                    lenisInstance.start();
+                }
             } else {
                 document.getElementById('break-hint').innerHTML = "Hit to break blocks!";
                 document.getElementById('break-hint').style.color = "#ffaa00";
@@ -753,11 +609,349 @@ function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-    composer.setSize(window.innerWidth, window.innerHeight);
 }
 
-function animate() {
+let targetProgress = 0;
+let currentProgress = 0;
+
+function updateUI(t) {
+    // UI Visibility for Skills (Rest at 3.19 to 4.26)
+    const uiWrapper = document.getElementById('skills-ui-wrapper');
+    if (uiWrapper) {
+        let skillsOpacity = 0;
+        if (t >= 3.0 && t < 3.9) {
+            if (t < 3.3) {
+                skillsOpacity = (t - 3.0) / 0.3; // Fade in
+            } else if (t > 3.5) {
+                skillsOpacity = 1 - (t - 3.5) / 0.4; // Fade out
+            } else {
+                skillsOpacity = 1;
+            }
+        }
+        
+        skillsOpacity = Math.round(skillsOpacity * 100) / 100;
+        
+        const currentOpacity = parseFloat(uiWrapper.style.opacity) || 0;
+        if (Math.abs(currentOpacity - skillsOpacity) > 0.01) {
+            uiWrapper.style.opacity = skillsOpacity;
+            
+            const showAxe = skillsOpacity > 0.1;
+            uiWrapper.style.pointerEvents = showAxe ? 'auto' : 'none';
+            
+            const customCursor = document.getElementById('custom-axe-cursor');
+            if (showAxe) {
+                document.body.classList.add('axe-cursor');
+                if (customCursor) customCursor.style.display = 'block';
+                isAxeEquipped = true;
+            } else {
+                document.body.classList.remove('axe-cursor');
+                if (customCursor) customCursor.style.display = 'none';
+                isAxeEquipped = false;
+            }
+        }
+    }
+
+    // Hide the 'services' HTML section to prevent overlap with the fixed Skills UI
+    const servicesSec = document.getElementById('services');
+    if (servicesSec) {
+        if (t > 3.2) {
+            servicesSec.style.opacity = '0';
+            servicesSec.style.pointerEvents = 'none';
+        } else {
+            servicesSec.style.opacity = '1';
+            servicesSec.style.pointerEvents = 'auto';
+        }
+    }
+
+    // UI Visibility for Projects header (Rest at 4.26 -> 7.45)
+    const projectsWrapper = document.getElementById('projects-ui-wrapper');
+    if (projectsWrapper) {
+        if (t >= 4.2 && t < 7.6) { 
+            if (projectsWrapper.style.opacity !== '1') {
+                projectsWrapper.style.opacity = '1';
+            }
+        } else {
+            if (projectsWrapper.style.opacity !== '0') {
+                projectsWrapper.style.opacity = '0';
+            }
+        }
+    }
+
+    // Experience section appears at its new window (7.6 -> 9.2)
+    const expSection = document.getElementById('experience');
+    if (expSection) {
+        if (t >= 7.6 && t < 9.2) {
+            expSection.style.opacity = '1';
+            expSection.style.pointerEvents = 'auto';
+        } else {
+            expSection.style.opacity = '0';
+            expSection.style.pointerEvents = 'none';
+        }
+    }
+
+    // Contact section appears when camera reaches the Contact 3D zone (t >= 9.0)
+    const contactSection = document.getElementById('contact');
+    if (contactSection) {
+        if (t >= 9.0) {
+            contactSection.style.opacity = '1';
+            contactSection.style.pointerEvents = 'auto';
+        } else {
+            contactSection.style.opacity = '0';
+            contactSection.style.pointerEvents = 'none';
+        }
+    }
+}
+
+/* ==========================================================================
+   LENIS SMOOTH SCROLL
+   ========================================================================== */
+let lenisInstance = null;
+
+function initLenis() {
+    if (typeof Lenis === 'undefined') return;
+    lenisInstance = new Lenis({
+        duration: 0.6,
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        smoothWheel: true,
+        wheelMultiplier: 1.5,
+        touchMultiplier: 2,
+        infinite: false,
+    });
+    // Feed Lenis into RAF so it doesn't conflict with Three.js loop
+    function onLenisRaf(time) {
+        if (lenisInstance) lenisInstance.raf(time);
+        requestAnimationFrame(onLenisRaf);
+    }
+    requestAnimationFrame(onLenisRaf);
+}
+
+/* ==========================================================================
+   SCROLL STACK (Projects Section)
+   ========================================================================== */
+let stackCards = [];
+let stackSectionTop = 0;
+let stackSectionHeight = 0;
+let cardOffsets = [];
+let stackEndTop = 0;
+
+function initScrollStack() {
+    stackCards = Array.from(document.querySelectorAll('.scroll-stack-card'));
+    if (!stackCards.length) return;
+    
+    // Configure default transform-origin and style as requested by React component
+    stackCards.forEach((card, i) => {
+        card.style.willChange = 'transform, filter';
+        card.style.transformOrigin = 'top center';
+        card.style.backfaceVisibility = 'hidden';
+        card.style.transform = 'translateZ(0)';
+        card.style.perspective = '1000px';
+        card.style.top = `calc(20vh + ${i * 30}px)`;
+    });
+
+    cacheScrollStackPositions();
+    // updateScrollStack is run inside animate() render loop every frame for smooth lerped sync,
+    // so we do not bind it to scroll event to prevent double-updating/vibration.
+    updateScrollStack();
+}
+
+function cacheScrollStackPositions() {
+    const container = document.getElementById('projects');
+    if (!container) return;
+
+    // Reset card styles to get correct original offsets relative to document top
+    stackCards.forEach(card => {
+        card.style.transform = '';
+        card.style.filter = '';
+    });
+
+    // Skills ends at exactly 400vh, so Projects starts exactly at 400vh
+    stackSectionTop = 4.0 * window.innerHeight;
+    stackSectionHeight = container.offsetHeight || (3.4 * window.innerHeight);
+
+    cardOffsets = stackCards.map(card => {
+        // card.offsetTop is the relative offset from the projects container top
+        return stackSectionTop + card.offsetTop;
+    });
+
+    const endElement = document.querySelector('.scroll-stack-end');
+    if (endElement) {
+        stackEndTop = stackSectionTop + endElement.offsetTop;
+    }
+}
+
+function updateScrollStack() {
+    if (!stackCards.length || !cardOffsets.length) return;
+
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    const scrollTop = currentProgress * maxScroll;
+    const containerHeight = window.innerHeight;
+
+    // Parameters matching the React component config:
+    // stackPosition = 20%, scaleEndPosition = 10%
+    const stackPositionPx = 0.20 * containerHeight;
+    const scaleEndPositionPx = 0.10 * containerHeight;
+    const itemStackDistance = 30;
+    const baseScale = 0.85;
+    const itemScale = 0.03;
+
+    const sectionScrolled = scrollTop - stackSectionTop;
+
+    stackCards.forEach((card, i) => {
+        const cardTop = cardOffsets[i];
+        
+        // Hide cards completely if scroll is above the start of the projects section
+        if (scrollTop < stackSectionTop) {
+            card.style.opacity = 0;
+            card.style.transform = 'scale(1)';
+            card.style.pointerEvents = 'none';
+            card.classList.remove('stack-visible');
+            return;
+        }
+
+        const triggerStart = cardTop - stackPositionPx - itemStackDistance * i;
+        const triggerEnd = cardTop - scaleEndPositionPx;
+        const pinStart = cardTop - stackPositionPx - itemStackDistance * i;
+        const pinEnd = stackEndTop - containerHeight / 2;
+
+        // Calculate progress for scaling
+        let scaleProgress = 0;
+        if (scrollTop > triggerStart) {
+            if (scrollTop < triggerEnd) {
+                scaleProgress = (scrollTop - triggerStart) / (triggerEnd - triggerStart);
+            } else {
+                scaleProgress = 1;
+            }
+        }
+        
+        const targetScale = baseScale + i * itemScale;
+        const scale = 1 - scaleProgress * (1 - targetScale);
+
+        // Apply scale transform continuously for depth stack effect, pinning is handled natively by CSS sticky top
+        card.style.transform = `scale(${scale})`;
+
+        // Fade in Card 0 smoothly over the first 150px of entering the projects section
+        let opacity = 1;
+        if (i === 0) {
+            const startFadeRange = 150; // 150px fade-in zone
+            opacity = Math.max(0, Math.min(1, sectionScrolled / startFadeRange));
+        } else {
+            // Other cards fade in based on viewport visibility
+            const isVisible = scrollTop > cardTop - containerHeight;
+            opacity = isVisible ? 1 : 0;
+        }
+
+        card.style.opacity = opacity;
+        card.style.pointerEvents = opacity > 0.1 ? 'auto' : 'none';
+        card.classList.toggle('stack-visible', opacity > 0.1);
+        card.style.zIndex = i;
+    });
+}
+
+/* ==========================================================================
+   TARGET CURSOR (Snapping Crosshair)
+   ========================================================================== */
+let cursorContainer = null;
+let cursorDot = null;
+let cursorCorners = [];
+let cursorMouseX = 0, cursorMouseY = 0;
+let cursorCurrentX = 0, cursorCurrentY = 0;
+let cursorIdleRotation = 0;
+let cursorHovering = false;
+let cursorTarget = null;
+let cursorIdleTimer = null;
+let cursorIdleSpin = false;
+const isCursorMobile = window.innerWidth <= 768;
+
+function setupTargetCursor() {
+    // The bracket effect is handled purely by CSS on .cursor-target:hover
+    // No cursor hiding — default cursor always visible
+    // This function is kept for future JS enhancements if needed
+    if (isCursorMobile) return;
+    // nothing to set up — CSS handles everything
+}
+
+function resetIdleSpin() {
+    cursorIdleSpin = false;
+    clearTimeout(cursorIdleTimer);
+    cursorIdleTimer = setTimeout(() => {
+        if (!cursorHovering) cursorIdleSpin = true;
+    }, 2000);
+}
+
+function updateCursorCorners(spreadX, spreadY, w, h) {
+    // Positions relative to cursor center (which is 0,0 in container)
+    const offsets = [
+        { x: -spreadX, y: -spreadY }, // TL
+        { x:  spreadX, y: -spreadY }, // TR
+        { x:  spreadX, y:  spreadY }, // BR
+        { x: -spreadX, y:  spreadY }, // BL
+    ];
+    cursorCorners.forEach((corner, i) => {
+        corner.style.width = w + 'px';
+        corner.style.height = h + 'px';
+        corner.style.transform = `translate(${offsets[i].x}px, ${offsets[i].y}px)`;
+    });
+}
+
+let cursorAnimId = null;
+function animateCursor() {
+    cursorAnimId = requestAnimationFrame(animateCursor);
+    if (!cursorContainer) return;
+
+    // Smooth follow
+    const lerpFactor = 0.18;
+    cursorCurrentX += (cursorMouseX - cursorCurrentX) * lerpFactor;
+    cursorCurrentY += (cursorMouseY - cursorCurrentY) * lerpFactor;
+
+    cursorContainer.style.transform = `translate(${cursorCurrentX}px, ${cursorCurrentY}px)`;
+
+    if (cursorHovering && cursorTarget) {
+        // Snap corners to the target card's bounding box
+        const r = cursorTarget.getBoundingClientRect();
+        const cx = r.left + r.width / 2;
+        const cy = r.top + r.height / 2;
+        const halfW = r.width / 2;
+        const halfH = r.height / 2;
+        const dx = cx - cursorCurrentX;
+        const dy = cy - cursorCurrentY;
+        const spreadX = halfW + Math.abs(dx) * 0.2;
+        const spreadY = halfH + Math.abs(dy) * 0.2;
+        updateCursorCorners(spreadX, spreadY, 18, 18);
+        cursorContainer.style.filter = 'drop-shadow(0 0 6px #10b981)';
+    } else {
+        updateCursorCorners(8, 8, 12, 12);
+        cursorContainer.style.filter = '';
+    }
+
+    // Idle spin
+    if (cursorIdleSpin && !cursorHovering) {
+        cursorIdleRotation += 0.8;
+        cursorContainer.style.rotate = cursorIdleRotation + 'deg';
+    } else {
+        cursorIdleRotation = 0;
+        cursorContainer.style.rotate = '0deg';
+    }
+}
+
+function animate(timestamp) {
     requestAnimationFrame(animate);
+    
+    // Drive GSAP timeline progress with native scroll position (with damping for butter-smooth motion)
+    if (tl) {
+        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+        targetProgress = maxScroll > 0 ? window.scrollY / maxScroll : 0;
+        
+        // Lerp progress to make camera moves smooth (0.1 damping factor)
+        currentProgress += (targetProgress - currentProgress) * 0.1; 
+        tl.progress(currentProgress);
+        
+        // Run UI visibility updates
+        updateUI(tl.time());
+    }
+
+    // Continuously sync scroll stack each frame for smoothness
+    updateScrollStack();
+    
     const time = clock.getElapsedTime();
 
     // Bouncing text animation
@@ -794,7 +988,7 @@ function animate() {
         }
     }
 
-    composer.render();
+    renderer.render(scene, camera);
 }
 
 init();

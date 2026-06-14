@@ -1,0 +1,32 @@
+{
+  "name": "lasak-ai-backend",
+  "version": "1.0.0",
+  "description": "Lasak AI Backend ported from Python to Node.js",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "prod": "pm2 start ecosystem.config.js",
+    "reload": "pm2 reload ecosystem.config.js",
+    "stop": "pm2 stop lasak-ai",
+    "logs": "pm2 logs lasak-ai",
+    "monit": "pm2 monit",
+    "watch-knowledge": "node scripts/watcher.js",
+    "convert-knowledge": "node scripts/converter.js",
+    "reindex": "node scripts/reindex.js"
+  },
+  "dependencies": {
+    "@qdrant/js-client-rest": "^1.18.0",
+    "bullmq": "^5.8.2",
+    "chokidar": "^3.6.0",
+    "compression": "^1.8.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^8.5.2",
+    "helmet": "^8.2.0",
+    "ioredis": "^5.4.1",
+    "pdf-parse": "^1.1.1",
+    "rate-limit-redis": "^5.0.0"
+  }
+}
