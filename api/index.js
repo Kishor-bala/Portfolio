@@ -43,14 +43,13 @@ app.use(helmet({
     crossOriginEmbedderPolicy: false
 }));
 
-// 3. Configure strict CORS policies (allowing dynamic localhost ports only in development)
+// 3. Configure strict CORS policies (allowing localhost, allowed origins, and Vercel preview domains)
 const allowedOrigins = process.env.ALLOWED_ORIGINS 
     ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
     : [
         'https://lasak.in',
         'https://lasakedu.in'
       ];
-const isDev = process.env.NODE_ENV !== 'production';
 
 app.use(cors({
     origin: (origin, callback) => {
@@ -63,9 +62,12 @@ app.use(cors({
                             origin === 'http://localhost' || 
                             origin === 'http://127.0.0.1';
                             
+        const isVercelDomain = origin.endsWith('.vercel.app') || 
+                               origin.includes('.projects.vercel.app');
+                            
         const isAllowedDomain = allowedOrigins.indexOf(origin) !== -1;
         
-        if (isAllowedDomain || (isDev && isLocalhost)) {
+        if (isAllowedDomain || isLocalhost || isVercelDomain) {
             callback(null, true);
         } else {
             callback(new Error('CORS Policy: Origin not allowed.'));
