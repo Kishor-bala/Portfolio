@@ -11,15 +11,15 @@
 
 **Full Name:** Kishor Bala G
 
-**Email:** kishorbala003@gmail.com
+**Email:** [Gmail](mailto:kishorbala0003@gmail.com) (kishorbala0003@gmail.com)
 
-**Phone:** Not available (I only share my email kishorbala003@gmail.com and LinkedIn profile for contacting, I cannot provide a phone number as of now)
+**Phone:** Not available (I only share my email [Gmail](mailto:kishorbala0003@gmail.com) and [LinkedIn](https://www.linkedin.com/in/kishor-bala-g-a28a23257/) profile for contacting, I cannot provide a phone number as of now)
 
 **Location:** Samalapuram, Tiruppur, Tamil Nadu, India
 
-**LinkedIn:** www.linkedin.com/in/kishor-bala-g-a28a23257
+**LinkedIn:** [LinkedIn](https://www.linkedin.com/in/kishor-bala-g-a28a23257/)
 
-**GitHub:** https://github.com/Kishor-bala
+**GitHub:** [GitHub](https://github.com/Kishor-bala)
 
 **Date of Birth:** 25 February 2007
 

@@ -13,7 +13,8 @@
     "monit": "pm2 monit",
     "watch-knowledge": "node scripts/watcher.js",
     "convert-knowledge": "node scripts/converter.js",
-    "reindex": "node scripts/reindex.js"
+    "reindex": "node scripts/reindex.js",
+    "flush-cache": "node scripts/flush-cache.js"
   },
   "dependencies": {
     "@qdrant/js-client-rest": "^1.18.0",

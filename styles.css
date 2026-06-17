@@ -1551,13 +1551,13 @@ strong {
 }
 
 .message-bubble a {
-    color: var(--cb-title-color);
+    color: #ffff00 !important; /* Highlighted yellow */
     text-decoration: underline;
     font-weight: bold;
 }
 
 .message-bubble a:hover {
-    color: #ffff55;
+    color: #ffcc00 !important; /* Highlighted gold on hover */
 }
 
 .message-bubble ul, .message-bubble ol {
