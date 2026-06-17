@@ -700,6 +700,34 @@ function updateUI(t) {
             contactSection.style.pointerEvents = 'none';
         }
     }
+
+    // Chatbot Dynamic Theme Switching based on scroll time 't'
+    const chatbotContainer = document.getElementById('minecraft-chatbot-container');
+    if (chatbotContainer) {
+        let activeTheme = 'theme-overworld';
+        if (t < 3.1) {
+            activeTheme = 'theme-overworld';
+        } else if (t >= 3.1 && t < 4.2) {
+            activeTheme = 'theme-skills';
+        } else if (t >= 4.2 && t < 7.6) {
+            activeTheme = 'theme-projects';
+        } else if (t >= 7.6 && t < 9.0) {
+            activeTheme = 'theme-experience';
+        } else {
+            activeTheme = 'theme-contact';
+        }
+
+        if (!chatbotContainer.classList.contains(activeTheme)) {
+            chatbotContainer.classList.remove(
+                'theme-overworld',
+                'theme-skills',
+                'theme-projects',
+                'theme-experience',
+                'theme-contact'
+            );
+            chatbotContainer.classList.add(activeTheme);
+        }
+    }
 }
 
 /* ==========================================================================
@@ -738,6 +766,10 @@ function initScrollStack() {
     stackCards = Array.from(document.querySelectorAll('.scroll-stack-card'));
     if (!stackCards.length) return;
     
+    const isMobile = window.innerWidth <= 768;
+    const cardTopOffset = isMobile ? '8vh' : '20vh';
+    const cardSpacing = isMobile ? 12 : 30;
+
     // Configure default transform-origin and style as requested by React component
     stackCards.forEach((card, i) => {
         card.style.willChange = 'transform, filter';
@@ -745,7 +777,7 @@ function initScrollStack() {
         card.style.backfaceVisibility = 'hidden';
         card.style.transform = 'translateZ(0)';
         card.style.perspective = '1000px';
-        card.style.top = `calc(20vh + ${i * 30}px)`;
+        card.style.top = `calc(${cardTopOffset} + ${i * cardSpacing}px)`;
     });
 
     cacheScrollStackPositions();
@@ -785,12 +817,13 @@ function updateScrollStack() {
     const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
     const scrollTop = currentProgress * maxScroll;
     const containerHeight = window.innerHeight;
+    const isMobile = window.innerWidth <= 768;
 
     // Parameters matching the React component config:
-    // stackPosition = 20%, scaleEndPosition = 10%
-    const stackPositionPx = 0.20 * containerHeight;
-    const scaleEndPositionPx = 0.10 * containerHeight;
-    const itemStackDistance = 30;
+    // stackPosition = 20% (8% for mobile), scaleEndPosition = 10% (4% for mobile)
+    const stackPositionPx = (isMobile ? 0.08 : 0.20) * containerHeight;
+    const scaleEndPositionPx = (isMobile ? 0.04 : 0.10) * containerHeight;
+    const itemStackDistance = isMobile ? 12 : 30;
     const baseScale = 0.85;
     const itemScale = 0.03;
 

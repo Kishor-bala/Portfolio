@@ -17,8 +17,55 @@
     <link rel="stylesheet" href="styles.css?v=22">
 </head>
 <body>
-
-
+    <!-- Minecraft-themed Loading Screen -->
+    <div id="loading-screen" class="minecraft-loader">
+        <div class="loader-content">
+            <h1 class="loader-title">KISHOR BALA</h1>
+            <div class="loader-bar-container">
+                <div class="loader-bar" id="loader-bar"></div>
+            </div>
+            <p class="loader-status" id="loader-status">Loading world...</p>
+        </div>
+    </div>
+    
+    <script>
+        (function() {
+            const loaderBar = document.getElementById('loader-bar');
+            const loaderScreen = document.getElementById('loading-screen');
+            const statusText = document.getElementById('loader-status');
+            
+            const statuses = ["Loading world...", "Building terrain...", "Spawning mobs...", "Starting server..."];
+            let statusIndex = 0;
+            
+            // Cycle status text every 250ms
+            const statusInterval = setInterval(() => {
+                statusIndex = (statusIndex + 1) % statuses.length;
+                if (statusText) statusText.textContent = statuses[statusIndex];
+            }, 250);
+            
+            let progress = 0;
+            const startTime = Date.now();
+            const duration = 1000; // 1 second
+            
+            function updateLoader() {
+                const elapsed = Date.now() - startTime;
+                progress = Math.min(100, (elapsed / duration) * 100);
+                if (loaderBar) loaderBar.style.width = progress + '%';
+                
+                if (elapsed < duration) {
+                    requestAnimationFrame(updateLoader);
+                } else {
+                    clearInterval(statusInterval);
+                    if (statusText) statusText.textContent = "Welcome!";
+                    setTimeout(() => {
+                        if (loaderScreen) loaderScreen.classList.add('fade-out');
+                    }, 150);
+                }
+            }
+            
+            requestAnimationFrame(updateLoader);
+        })();
+    </script>
     <!-- 3D Canvas -->
     <canvas id="bg-canvas"></canvas>
 
@@ -350,7 +397,52 @@
 
         <!-- Chat Toggle Button -->
         <button id="chatbot-toggle-btn" class="chatbot-toggle-btn" aria-label="Open Assistant">
-            <span class="btn-icon">💬</span>
+            <svg class="minecraft-robot-icon" viewBox="0 0 16 16" width="36" height="36" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+                <!-- Torch Antenna -->
+                <rect class="redstone-torch-glow" x="7" y="0" width="2" height="2" fill="var(--cb-torch-glow)" />
+                <rect x="7" y="2" width="2" height="1" fill="var(--cb-torch-highlight)" />
+                <rect x="7" y="3" width="2" height="2" fill="var(--cb-torch-handle)" />
+                <rect x="7" y="5" width="2" height="1" fill="var(--cb-torch-base)" />
+
+                <!-- Head Border -->
+                <rect x="1" y="6" width="14" height="10" fill="var(--cb-casing-border)" />
+
+                <!-- Head Main Face -->
+                <rect x="2" y="7" width="12" height="8" fill="var(--cb-casing-base)" />
+
+                <!-- Casing Highlights/Shadows -->
+                <rect x="2" y="7" width="12" height="1" fill="var(--cb-casing-light)" />
+                <rect x="2" y="8" width="1" height="7" fill="var(--cb-casing-light)" />
+                <rect x="13" y="8" width="1" height="7" fill="var(--cb-casing-dark)" />
+                <rect x="3" y="14" width="10" height="1" fill="var(--cb-casing-dark)" />
+
+                <!-- Forehead circuit lines -->
+                <rect x="4" y="8" width="8" height="1" fill="var(--cb-circuit-base)" />
+                <rect class="redstone-flicker-1" x="5" y="8" width="2" height="1" fill="var(--cb-circuit-glow)" />
+                <rect class="redstone-flicker-2" x="9" y="8" width="2" height="1" fill="var(--cb-circuit-glow)" />
+                <rect class="redstone-flicker-3" x="7" y="9" width="2" height="1" fill="var(--cb-circuit-glow)" />
+
+                <!-- Eyes -->
+                <!-- Left Eye -->
+                <rect x="3" y="10" width="3" height="2" fill="var(--cb-eye-base)" />
+                <rect class="glowing-eye" x="3" y="10" width="2" height="2" fill="var(--cb-eye-glow)" />
+                <rect x="3" y="10" width="1" height="1" fill="var(--cb-eye-light)" />
+                <!-- Right Eye -->
+                <rect x="10" y="10" width="3" height="2" fill="var(--cb-eye-base)" />
+                <rect class="glowing-eye" x="11" y="10" width="2" height="2" fill="var(--cb-eye-glow)" />
+                <rect x="11" y="10" width="1" height="1" fill="var(--cb-eye-light)" />
+
+                <!-- Mouth -->
+                <rect x="5" y="12" width="6" height="2" fill="var(--cb-mouth-base)" />
+                <rect x="6" y="13" width="1" height="1" fill="var(--cb-mouth-slot)" />
+                <rect x="8" y="13" width="1" height="1" fill="var(--cb-mouth-slot)" />
+                <rect x="10" y="13" width="1" height="1" fill="var(--cb-mouth-slot)" />
+                <rect x="7" y="12" width="2" height="1" fill="var(--cb-mouth-slot)" />
+
+                <!-- Cheek Rivets -->
+                <rect x="2" y="12" width="1" height="1" fill="var(--cb-accent)" />
+                <rect x="13" y="12" width="1" height="1" fill="var(--cb-accent)" />
+            </svg>
         </button>
 
         <!-- Chat Panel -->
@@ -359,7 +451,50 @@
             <div class="chatbot-header">
                 <div class="header-left">
                     <span class="avatar-holder">
-                        <img src="assets/Formal photo.jpeg" alt="Kishor" class="pixel-avatar">
+                        <svg class="minecraft-robot-icon-mini" viewBox="0 0 16 16" width="24" height="24" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+                            <!-- Torch Antenna -->
+                            <rect class="redstone-torch-glow" x="7" y="0" width="2" height="2" fill="var(--cb-torch-glow)" />
+                            <rect x="7" y="2" width="2" height="1" fill="var(--cb-torch-highlight)" />
+                            <rect x="7" y="3" width="2" height="2" fill="var(--cb-torch-handle)" />
+                            <rect x="7" y="5" width="2" height="1" fill="var(--cb-torch-base)" />
+
+                            <!-- Head Border -->
+                            <rect x="1" y="6" width="14" height="10" fill="var(--cb-casing-border)" />
+
+                            <!-- Head Main Face -->
+                            <rect x="2" y="7" width="12" height="8" fill="var(--cb-casing-base)" />
+
+                            <!-- Casing Highlights/Shadows -->
+                            <rect x="2" y="7" width="12" height="1" fill="var(--cb-casing-light)" />
+                            <rect x="2" y="8" width="1" height="7" fill="var(--cb-casing-light)" />
+                            <rect x="13" y="8" width="1" height="7" fill="var(--cb-casing-dark)" />
+                            <rect x="3" y="14" width="10" height="1" fill="var(--cb-casing-dark)" />
+
+                            <!-- Forehead circuit lines -->
+                            <rect x="4" y="8" width="8" height="1" fill="var(--cb-circuit-base)" />
+                            <rect class="redstone-flicker-1" x="5" y="8" width="2" height="1" fill="var(--cb-circuit-glow)" />
+                            <rect class="redstone-flicker-2" x="9" y="8" width="2" height="1" fill="var(--cb-circuit-glow)" />
+                            <rect class="redstone-flicker-3" x="7" y="9" width="2" height="1" fill="var(--cb-circuit-glow)" />
+
+                            <!-- Eyes -->
+                            <rect x="3" y="10" width="3" height="2" fill="var(--cb-eye-base)" />
+                            <rect class="glowing-eye" x="3" y="10" width="2" height="2" fill="var(--cb-eye-glow)" />
+                            <rect x="3" y="10" width="1" height="1" fill="var(--cb-eye-light)" />
+                            <rect x="10" y="10" width="3" height="2" fill="var(--cb-eye-base)" />
+                            <rect class="glowing-eye" x="11" y="10" width="2" height="2" fill="var(--cb-eye-glow)" />
+                            <rect x="11" y="10" width="1" height="1" fill="var(--cb-eye-light)" />
+
+                            <!-- Mouth -->
+                            <rect x="5" y="12" width="6" height="2" fill="var(--cb-mouth-base)" />
+                            <rect x="6" y="13" width="1" height="1" fill="var(--cb-mouth-slot)" />
+                            <rect x="8" y="13" width="1" height="1" fill="var(--cb-mouth-slot)" />
+                            <rect x="10" y="13" width="1" height="1" fill="var(--cb-mouth-slot)" />
+                            <rect x="7" y="12" width="2" height="1" fill="var(--cb-mouth-slot)" />
+
+                            <!-- Cheek Rivets -->
+                            <rect x="2" y="12" width="1" height="1" fill="var(--cb-accent)" />
+                            <rect x="13" y="12" width="1" height="1" fill="var(--cb-accent)" />
+                        </svg>
                     </span>
                     <h3 class="chatbot-title">Assistant</h3>
                 </div>
