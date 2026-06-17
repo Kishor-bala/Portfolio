@@ -1,5 +1,6 @@
 const chokidar = require('chokidar');
 const path = require('path');
+const fs = require('fs');
 const { getDocumentQueue, getRedisConnection } = require('./queue');
 
 let useQueue = false;
@@ -40,29 +41,36 @@ const knowledgeDir = path.join(rootDir, 'knowledge');
 
 console.log(`Starting file watcher on: ${knowledgeDir}`);
 
-// Watch only top-level files in knowledgeDir (do not recurse into subdirectories)
+// Watch knowledgeDir recursively
 const watcher = chokidar.watch(knowledgeDir, {
-    ignored: [
+    ignored: (filePath) => {
+        // Normalize backslashes to forward slashes for cross-platform matching
+        const normalizedPath = filePath.replace(/\\/g, '/');
+        const fileName = path.basename(normalizedPath);
+
         // Ignore dotfiles
-        /(^|[\/\\])\../,
-        // Ignore subdirectories to prevent circular watch triggers
-        path.join(knowledgeDir, 'courses', '**'),
-        path.join(knowledgeDir, 'faculty', '**'),
-        path.join(knowledgeDir, 'policies', '**'),
-        path.join(knowledgeDir, 'placements', '**'),
-        path.join(knowledgeDir, 'faq', '**'),
+        if (/(^|[\/\\])\../.test(normalizedPath)) return true;
+
         // Ignore consolidated files
-        path.join(knowledgeDir, 'consolidated_knowledge.json'),
-        path.join(knowledgeDir, 'consolidated_knowledge.md')
-    ],
+        if (fileName === 'consolidated_knowledge.json' || fileName === 'consolidated_knowledge.md') return true;
+
+        return false;
+    },
     persistent: true,
-    depth: 0, // Watch only the root of the knowledge directory
     ignoreInitial: true // Set to true so initial files don't trigger events on startup
 });
 
 const handleFile = async (filePath, action) => {
+    try {
+        if (!fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
+            return;
+        }
+    } catch (e) {
+        return;
+    }
+
     const ext = path.extname(filePath).toLowerCase();
-    if (ext === '.pdf' || ext === '.json' || ext === '.md') {
+    if (ext === '.pdf' || ext === '.json' || ext === '.md' || ext === '.txt') {
         const fileName = path.basename(filePath);
         
         // Safety check for consolidated names
@@ -101,7 +109,7 @@ const handleFileDelete = async (filePath) => {
     const fileName = path.basename(filePath);
     const ext = path.extname(filePath).toLowerCase();
     
-    if (ext === '.pdf' || ext === '.json' || ext === '.md') {
+    if (ext === '.pdf' || ext === '.json' || ext === '.md' || ext === '.txt') {
         if (fileName === 'consolidated_knowledge.json' || fileName === 'consolidated_knowledge.md') {
             return;
         }
@@ -130,5 +138,6 @@ const handleFileDelete = async (filePath) => {
 watcher.on('add', (filePath) => handleFile(filePath, 'ADDED'));
 watcher.on('change', (filePath) => handleFile(filePath, 'MODIFIED'));
 watcher.on('unlink', (filePath) => handleFileDelete(filePath));
+watcher.on('error', (error) => console.error(`[WATCHER ERROR] Chokidar watcher encountered an error: ${error.message}`));
 
 console.log('File watcher is active and listening for new/modified/deleted files...');

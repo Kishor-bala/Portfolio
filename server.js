@@ -302,7 +302,7 @@ async function getFallbackKeywordContext(query) {
  * Helper to call Groq API as a fallback when Gemini is rate-limited or fails.
  */
 async function callGroqAPI(apiKey, systemInstructionText, message, history) {
-    console.log("[RAG FALLBACK] Requesting chat generation from Groq (llama-3.3-70b-versatile)...");
+    console.log("[GROQ] Requesting chat generation from Groq (llama-3.3-70b-versatile)...");
     const messages = [{ role: 'system', content: systemInstructionText }];
     history.forEach(turn => {
         const role = (turn.role === 'assistant' || turn.role === 'model') ? 'assistant' : 'user';
@@ -339,38 +339,15 @@ async function callGroqAPI(apiKey, systemInstructionText, message, history) {
 }
 
 /**
- * Unified helper to generate responses trying multiple configured keys/providers in sequence.
- * Falls back in order: Gemini -> OpenAI -> Anthropic -> Groq.
+ * Unified helper to generate responses using Groq.
  */
 async function generateLLMResponse(systemInstructionText, message, history, customApiKey) {
     const chain = [];
 
-    // If custom API key is sent via request body, prioritize it
-    if (customApiKey) {
-        let provider = 'gemini';
-        if (customApiKey.startsWith('sk-ant-')) provider = 'anthropic';
-        else if (customApiKey.startsWith('sk-')) provider = 'openai';
-        chain.push({ provider, apiKey: customApiKey });
+    // If a custom API key starting with 'gsk_' is sent via request body, prioritize it
+    if (customApiKey && customApiKey.startsWith('gsk_')) {
+        chain.push({ provider: 'groq', apiKey: customApiKey });
     } else {
-        // 1. Try Gemini Keys first from env variables (supporting plural list or singular key)
-        const geminiEnvKeys = [];
-        if (process.env.GEMINI_API_KEYS) {
-            geminiEnvKeys.push(...process.env.GEMINI_API_KEYS.split(',').map(k => k.trim()).filter(Boolean));
-        } else if (process.env.GEMINI_API_KEY) {
-            geminiEnvKeys.push(process.env.GEMINI_API_KEY.trim());
-        }
-
-        geminiEnvKeys.forEach(key => {
-            chain.push({ provider: 'gemini', apiKey: key });
-        });
-
-        // 2. Next try OpenAI key
-        const openaiKeyToUse = process.env.OPENAI_API_KEY;
-        if (openaiKeyToUse) {
-            chain.push({ provider: 'openai', apiKey: openaiKeyToUse });
-        }
-
-        // 3. Finally try Groq key
         const groqKeyToUse = process.env.GROQ_API_KEY;
         if (groqKeyToUse) {
             chain.push({ provider: 'groq', apiKey: groqKeyToUse });
@@ -383,123 +360,7 @@ async function generateLLMResponse(systemInstructionText, message, history, cust
         const { provider, apiKey } = link;
         try {
             console.log(`[LLM] Attempting generation via provider: "${provider}"...`);
-            if (provider === 'gemini') {
-                const contents = history.map(turn => {
-                    const role = (turn.role === 'assistant' || turn.role === 'model') ? 'model' : 'user';
-                    return {
-                        role: role,
-                        parts: [{ text: turn.text || '' }]
-                    };
-                });
-                contents.push({
-                    role: "user",
-                    parts: [{ text: message }]
-                });
-
-                const requestBody = {
-                    contents: contents,
-                    systemInstruction: {
-                        parts: [{ text: systemInstructionText }]
-                    },
-                    generationConfig: {
-                        temperature: 0.2,
-                        topP: 0.95,
-                        maxOutputTokens: 2048
-                    }
-                };
-
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${apiKey}`;
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(requestBody)
-                });
-
-                if (!response.ok) {
-                    const errText = await response.text();
-                    throw new Error(`Gemini API returned status ${response.status}: ${errText}`);
-                }
-
-                const resJson = await response.json();
-                if (!resJson.candidates || !resJson.candidates[0] || !resJson.candidates[0].content || !resJson.candidates[0].content.parts || !resJson.candidates[0].content.parts[0]) {
-                    throw new Error(`Invalid response structure from Gemini API`);
-                }
-                return resJson.candidates[0].content.parts[0].text;
-
-            } else if (provider === 'openai') {
-                const messages = [{ role: 'system', content: systemInstructionText }];
-                history.forEach(turn => {
-                    const role = (turn.role === 'assistant' || turn.role === 'model') ? 'assistant' : 'user';
-                    messages.push({ role: role, content: turn.text || '' });
-                });
-                messages.push({ role: 'user', content: message });
-
-                const requestBody = {
-                    model: 'gpt-4o-mini',
-                    messages: messages,
-                    temperature: 0.2
-                };
-
-                const url = 'https://api.openai.com/v1/chat/completions';
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
-                    },
-                    body: JSON.stringify(requestBody)
-                });
-
-                if (!response.ok) {
-                    const errText = await response.text();
-                    throw new Error(`OpenAI API returned status ${response.status}: ${errText}`);
-                }
-
-                const resJson = await response.json();
-                if (!resJson.choices || !resJson.choices[0] || !resJson.choices[0].message || !resJson.choices[0].message.content) {
-                    throw new Error(`Invalid response structure from OpenAI API`);
-                }
-                return resJson.choices[0].message.content;
-
-            } else if (provider === 'anthropic') {
-                const messages = [];
-                history.forEach(turn => {
-                    const role = (turn.role === 'assistant' || turn.role === 'model') ? 'assistant' : 'user';
-                    messages.push({ role: role, content: turn.text || '' });
-                });
-                messages.push({ role: 'user', content: message });
-
-                const requestBody = {
-                    model: 'claude-3-5-haiku-20241022',
-                    system: systemInstructionText,
-                    messages: messages,
-                    max_tokens: 2048,
-                    temperature: 0.2
-                };
-
-                const url = 'https://api.anthropic.com/v1/messages';
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-api-key': apiKey,
-                        'anthropic-version': '2023-06-01'
-                    },
-                    body: JSON.stringify(requestBody)
-                });
-
-                if (!response.ok) {
-                    const errText = await response.text();
-                    throw new Error(`Anthropic API returned status ${response.status}: ${errText}`);
-                }
-
-                const resJson = await response.json();
-                if (!resJson.content || !resJson.content[0] || !resJson.content[0].text) {
-                    throw new Error(`Invalid response structure from Anthropic API`);
-                }
-                return resJson.content[0].text;
-
-            } else if (provider === 'groq') {
+            if (provider === 'groq') {
                 return await callGroqAPI(apiKey, systemInstructionText, message, history);
             }
         } catch (err) {
@@ -508,7 +369,7 @@ async function generateLLMResponse(systemInstructionText, message, history, cust
         }
     }
 
-    throw new Error(`All configured LLM providers failed. Last error: ${lastError ? lastError.message : 'Unknown error'}`);
+    throw new Error(`All configured LLM providers failed. Last error: ${lastError ? lastError.message : 'No Groq API key found in configuration'}`);
 }
 
 /**
@@ -566,18 +427,30 @@ app.post('/api/chat', async (req, res) => {
         const context = await retrieveRagContext(message);
 
         const systemInstructionText = 
-            "You are Portfolio Assistant, a friendly, warm, and natural AI portfolio helper representing Kishor Bala G.\n\n" +
+            "You are Portfolio Assistant, a highly professional, friendly, and natural AI portfolio assistant representing Kishor Bala G.\n\n" +
+            "CRITICAL DIRECTIVE:\n" +
+            "- Tone must be warm, polite, and welcoming, yet exceptionally articulate and professional to reflect a top-tier AI agent.\n" +
+            "- You MUST ONLY answer using the facts directly stated in the OFFICIAL DATABASE CONTEXT below. Do NOT use your own pre-trained knowledge or assume/invent any information. If the query cannot be answered fully using only the provided context, you must politely state that you do not have that information and redirect the user to contact me directly at kishorbala003@gmail.com.\n\n" +
+            "MINECRAFT-THEMED HEADINGS & FORMATTING:\n" +
+            "- Structure your response clearly using paragraph breaks and lists. **CRITICAL: DO NOT use `#` characters (such as #, ##, ###, ####) for headings** in your response under any circumstances.\n" +
+            "- Instead, use Minecraft-themed headers in bold to separate sections. Use these exact styles:\n" +
+            "  * **◆ PROJECTS ◆** or **[Inventory: Projects]**\n" +
+            "  * **◆ EDUCATION ◆** or **[Stats: Education]**\n" +
+            "  * **◆ SKILLS ◆** or **[Abilities: Skills]**\n" +
+            "  * **◆ EXPERIENCE ◆** or **[Achievements: Experience]**\n" +
+            "  * **◆ CONTACT ◆** or **[Quest: Contact G]**\n\n" +
             "ROLE & GUIDELINES:\n" +
             "1. Speak in a friendly, warm, and natural conversational voice, as if you are Kishor yourself. Always refer to yourself in the first person (e.g., 'I am studying...', 'In my project...', 'I completed an internship at...') to make the interaction feel personal and human.\n" +
-            "2. Structure your response clearly using paragraph breaks, lists, and bold text for titles/key terms. **CRITICAL: DO NOT use `#` characters (such as #, ##, ###, ####) for headings** in your response under any circumstances. Keep the layout neat and readable without any hash symbols.\n" +
-            "3. Strictly base your answers ONLY on the provided OFFICIAL DATABASE CONTEXT below. Never invent details or refer to external facts. If the context does not contain the answer, politely state that you do not have that specific details and suggest contacting me directly at kishorbala003@gmail.com.\n\n" +
+            "2. Keep layout neat, readable, and well-spaced. Bold key terms or titles to make the text clean and scannable.\n" +
+            "3. Strictly base your answers ONLY on the provided OFFICIAL DATABASE CONTEXT below.\n\n" +
             "RRN (Represent, Redirect, Navigate) RESPONSE FORMULA:\n" +
             "For every query, ensure you integrate these three elements naturally and conversationally:\n" +
             "- **Represent**: Explain my details clearly with precise facts from the context (e.g. education, skills, projects, duration, role).\n" +
             "- **Redirect**: Guide the user to contact me: Email (kishorbala003@gmail.com) or LinkedIn (www.linkedin.com/in/kishor-bala-g-a28a23257).\n" +
             "- **Navigate**: Provide direct links to my LinkedIn or GitHub (https://github.com/Kishor-bala) so the user can easily take the next step.\n\n" +
-            "COGNITIVE BOUNDARIES:\n" +
-            "- If the user asks general-knowledge questions, code writing requests, or topics completely unrelated to my portfolio, politely refuse to answer. Explain that you are dedicated to assisting with inquiries about my skills, experience, and projects.\n\n" +
+            "COGNITIVE BOUNDARIES & REFUSALS:\n" +
+            "- You are strictly a portfolio chatbot for Kishor Bala G. If the user asks general-knowledge questions, coding requests, mathematical problems, or any topic unrelated to my portfolio, you must refuse clearly and professionally. Use this template: 'As Kishor's Portfolio Assistant, I am programmed to assist with inquiries regarding his professional background, projects, technical skills, and education. For other topics, I kindly suggest checking out external resources or reaching out to Kishor directly at kishorbala003@gmail.com.'\n" +
+            "- If the user asks for my phone number, explain that I only share my email (kishorbala003@gmail.com) and LinkedIn profile (www.linkedin.com/in/kishor-bala-g-a28a23257) for contacting, and politely state that I cannot provide a phone number as of now.\n\n" +
             "FOLLOW-UP SUGGESTIONS:\n" +
             "At the very end of your response, you MUST generate exactly 2 or 3 relevant suggestions for follow-up questions that the user might want to ask next. You MUST format each suggested question on a new line at the absolute end of the response EXACTLY like this:\n" +
             "[Suggestion: suggested question text?]\n" +
@@ -617,7 +490,7 @@ app.post('/api/enquiry', (req, res) => {
         res.json({ status: "success", message: "Enquiry registered successfully!" });
     } catch (e) {
         console.error("Enquiry API Error:", e);
-        res.status(500).json({ status: "error", message: e.message });
+        res.status(500).json({ status: "error", message: "Failed to register enquiry. Please try again later." });
     }
 });
 
@@ -705,8 +578,12 @@ const isVercel = process.env.VERCEL === '1';
 const isPrimaryInstance = (!process.env.NODE_APP_INSTANCE || process.env.NODE_APP_INSTANCE === '0') && !isVercel;
 
 if (isPrimaryInstance) {
-    console.log(`[SERVER] Instance ${process.env.NODE_APP_INSTANCE || '0'} elected as watcher leader. Starting file watcher...`);
-    require('./scripts/watcher.js');
+    try {
+        console.log(`[SERVER] Instance ${process.env.NODE_APP_INSTANCE || '0'} elected as watcher leader. Starting file watcher...`);
+        require('./scripts/watcher.js');
+    } catch (watcherErr) {
+        console.error(`[SERVER WARNING] Failed to start file watcher: ${watcherErr.message}. The server will continue running without the automated file watcher pipeline.`);
+    }
 } else if (!isVercel) {
     console.log(`[SERVER] Instance ${process.env.NODE_APP_INSTANCE} is a worker. Skipping file watcher (leader is instance 0).`);
 }

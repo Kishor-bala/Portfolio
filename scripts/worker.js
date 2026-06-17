@@ -32,7 +32,8 @@ const worker = new Worker('document-processing', async (job) => {
     }
 }, {
     connection: getRedisConnection(),
-    concurrency: 1 // process one file at a time
+    concurrency: 1, // process one file at a time
+    checkCompatibility: false
 });
 
 worker.on('active', (job) => {

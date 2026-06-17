@@ -3,26 +3,12 @@ const path = require('path');
 const crypto = require('crypto');
 const pdf = require('pdf-parse');
 const { getDocumentEmbedding } = require('./embedder');
-const { upsertPoints } = require('./qdrant');
+const { upsertPoints, deletePointsBySource } = require('./qdrant');
 
 // Paths
 const rootDir = path.resolve(__dirname, '..');
 const knowledgeDir = path.join(rootDir, 'knowledge');
-const coursesDir = path.join(knowledgeDir, 'courses');
-const facultyDir = path.join(knowledgeDir, 'faculty');
-const policiesDir = path.join(knowledgeDir, 'policies');
-const placementsDir = path.join(knowledgeDir, 'placements');
-const faqDir = path.join(knowledgeDir, 'faq');
 const lasakDataPath = path.join(rootDir, 'lasak_data.json');
-
-// Ensure directories exist
-function ensureDirs() {
-    [coursesDir, facultyDir, policiesDir, placementsDir, faqDir].forEach(dir => {
-        if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir, { recursive: true });
-        }
-    });
-}
 
 /**
  * Parses raw text from files based on extension.
@@ -91,6 +77,14 @@ async function processFile(filePath) {
     try {
         console.log(`[PROCESS] Processing file: ${filePath}`);
         const fileName = path.basename(filePath);
+
+        // Delete existing points for this source file to prevent duplicate/orphaned chunks on updates
+        try {
+            await deletePointsBySource(fileName);
+        } catch (delErr) {
+            console.warn(`[PROCESS WARNING] Could not clear existing points for ${fileName}:`, delErr.message);
+        }
+
         const text = await parseFile(filePath);
         
         const chunks = chunkText(text, fileName);
@@ -137,7 +131,6 @@ async function processFile(filePath) {
  * and compiles consolidated files.
  */
 async function regenerateStructuredKnowledge() {
-    ensureDirs();
     console.log('[STRUCTURE] Regenerating consolidated knowledge files from knowledge folder...');
 
     try {

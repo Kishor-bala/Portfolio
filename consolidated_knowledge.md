@@ -1,3 +1,10 @@
+# Consolidated Portfolio & Knowledge Base
+
+
+---
+
+## Source File: KISHOR_BALA_G_PROFILE.md
+
 # KISHOR BALA G
 
 ## Basic Information
@@ -6,7 +13,7 @@
 
 **Email:** kishorbala003@gmail.com
 
-**Phone:** Not available (I only share my email kishorbala003@gmail.com and LinkedIn profile for contacting, I cannot provide a phone number as of now)
+**Phone:** (Optional)
 
 **Location:** Samalapuram, Tiruppur, Tamil Nadu, India
 
@@ -61,11 +68,12 @@ Computer Science and Engineering student with strong interests in Artificial Int
 - Google Apps Script + Google Sheets backend
 - Real-time vote management
 
-## Retrieval-Augmented AI Knowledge System (RAG AI Model) - [Recent Project]
-- Developed a complete RAG-based AI model and conversational backend for query response grounding.
-- Configured Qdrant vector database with Gemini embeddings and Groq failover API integration.
-- Designed automatic file processing pipeline for real-time document chunking, embedding, and deletion syncing.
-- Implemented fallback keyword context extraction and high-performance Redis caching.
+## Retrieval-Augmented AI Knowledge System
+- Embeddings
+- Vector databases
+- Semantic search
+- Indexing and chunking
+- Workflow automation
 
 ## Personal Portfolio Website
 - Three.js
@@ -105,3 +113,4 @@ Computer Science and Engineering student with strong interests in Artificial Int
 - Linux
 - VirtualBox
 - n8n
+

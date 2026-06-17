@@ -13,6 +13,7 @@
     const chatbotMessages = document.getElementById('chatbot-messages');
     const chatbotForm = document.getElementById('chatbot-form');
     const chatbotInput = document.getElementById('chatbot-input');
+    const chatbotPromptBubble = document.getElementById('chatbot-prompt-bubble');
 
     // Ensure elements exist before binding
     if (!chatbotToggleBtn || !chatbotPanel || !chatbotCloseBtn || !chatbotMessages || !chatbotForm || !chatbotInput) {
@@ -26,11 +27,15 @@
         if (!chatbotPanel.classList.contains('hidden')) {
             chatbotInput.focus();
             scrollToBottom();
+            if (chatbotPromptBubble) chatbotPromptBubble.classList.add('hidden');
+        } else {
+            if (chatbotPromptBubble) chatbotPromptBubble.classList.remove('hidden');
         }
     });
 
     chatbotCloseBtn.addEventListener('click', () => {
         chatbotPanel.classList.add('hidden');
+        if (chatbotPromptBubble) chatbotPromptBubble.classList.remove('hidden');
     });
 
     // Handle Suggestions Click

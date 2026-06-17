@@ -37,6 +37,7 @@ function getDocumentQueue() {
         const conn = getRedisConnection();
         documentQueue = new Queue('document-processing', {
             connection: conn,
+            checkCompatibility: false,
             defaultJobOptions: {
                 // Auto-remove completed jobs — keep only last 20 for debugging
                 removeOnComplete: { count: 20 },
