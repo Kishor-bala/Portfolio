@@ -356,15 +356,15 @@ function ensureClickableLinks(text) {
     let updated = text;
 
     // 1. Convert any raw LinkedIn profile to [LinkedIn](https://www.linkedin.com/in/kishor-bala-g-a28a23257)
-    const linkedinRegex = /(?<!\[)(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/kishor-bala-g-a28a23257\/?(?!\))/gi;
+    const linkedinRegex = /(?<![\(\[])(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/kishor-bala-g-a28a23257\/?/gi;
     updated = updated.replace(linkedinRegex, '[LinkedIn](https://www.linkedin.com/in/kishor-bala-g-a28a23257)');
 
     // 2. Convert any raw GitHub profile to [GitHub](https://github.com/Kishor-bala)
-    const githubRegex = /(?<!\[)(?:https?:\/\/)?(?:www\.)?github\.com\/Kishor-bala\/?(?!\))/gi;
+    const githubRegex = /(?<![\(\[])(?:https?:\/\/)?(?:www\.)?github\.com\/Kishor-bala\/?/gi;
     updated = updated.replace(githubRegex, '[GitHub](https://github.com/Kishor-bala)');
 
     // 3. Convert any raw Gmail address to [Gmail](mailto:kishorbala003@gmail.com)
-    const gmailRegex = /(?<!\[)kishorbala000?3@gmail\.com(?!\))/gi;
+    const gmailRegex = /(?<!(?:mailto:|\[))kishorbala000?3@gmail\.com/gi;
     updated = updated.replace(gmailRegex, '[Gmail](mailto:kishorbala003@gmail.com)');
 
     // 4. Convert any markdown headers (e.g. ### Header) into bold text to avoid raw ## symbols
