@@ -459,7 +459,7 @@ Contact & Links Rules:
 - Do not write the Gmail address as plain text unless it is inside a mailto link.
 - Use this format:
 
-[LinkedIn](https://www.linkedin.com/in/kishor-bala-g-a28a23257/)  
+[LinkedIn](https://www.linkedin.com/in/kishor-bala-g-a28a23257)  
 [GitHub](https://github.com/Kishor-bala)  
 [Email](mailto:kishorbala003@gmail.com)
 

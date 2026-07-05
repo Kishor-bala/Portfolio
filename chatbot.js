@@ -266,7 +266,7 @@
 
         // Link ([text](url))
         html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, linkText, url) => {
-            const cleanUrl = url.replace(/&amp;/g, '&');
+            const cleanUrl = url.trim().replace(/&amp;/g, '&');
             return `<a href="${cleanUrl}" target="_blank">${linkText}</a>`;
         });
 
