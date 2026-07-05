@@ -18,7 +18,7 @@ const clock = new THREE.Clock();
 let isAxeEquipped = false;
 let clickBoxesInstruction;
 const breakableBlocks = [];
-const skillsList = ["Python", "Java", "C++", "HTML", "DBMS", "Web Development", "Cloud-Computing"];
+const skillsList = ["Python", "C++", "Cloud Computing", "DBMS", "MERN Stack", "n8n Automations", "Linux"];
 let skillsRevealed = 0;
 let isScrollLocked = false;
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();

@@ -3,8 +3,8 @@
     let history = [];
     let isGenerating = false;
 
-    // API Base URL (adjusts dynamically if hosted or local file:// protocol)
-    const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:8080' : '';
+    // API Base URL (adjusts dynamically if hosted or local)
+    const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:') ? 'http://localhost:8080' : '';
 
     // DOM Elements
     const chatbotToggleBtn = document.getElementById('chatbot-toggle-btn');

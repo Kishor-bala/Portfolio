@@ -4,15 +4,15 @@
 
 **Full Name:** Kishor Bala G
 
-**Email:** kishorbala003@gmail.com
+**Email:** [Gmail](mailto:kishorbala003@gmail.com)
 
 **Phone:** (Optional)
 
 **Location:** Samalapuram, Tiruppur, Tamil Nadu, India
 
-**LinkedIn:** www.linkedin.com/in/kishor-bala-g-a28a23257
+**LinkedIn:** [LinkedIn](https://www.linkedin.com/in/kishor-bala-g-a28a23257)
 
-**GitHub:** https://github.com/Kishor-bala
+**GitHub:** [GitHub](https://github.com/Kishor-bala)
 
 **Date of Birth:** 25 February 2007
 
@@ -81,28 +81,10 @@ Computer Science and Engineering student with strong interests in Artificial Int
 ---
 
 # Technical Skills
-
-## Languages
 - Python
-- JavaScript
-- HTML
-- CSS
-- C++ (Basics)
-
-## AI & Backend
-- RAG
-- Vector Databases
-- Embeddings
-- Prompt Engineering
-- Redis
-- REST APIs
-- Job Queues
-- Rate Limiting
-
-## Tools
-- Git
-- GitHub
-- VS Code
+- C++
+- Cloud Computing
+- DBMS
+- MERN Stack
+- n8n Automations
 - Linux
-- VirtualBox
-- n8n

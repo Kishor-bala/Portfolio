@@ -1,5 +1,6 @@
 const { QdrantClient } = require('@qdrant/js-client-rest');
 require('dotenv').config();
+const { EMBEDDING_DIM } = require('./embedder');
 
 // Patch for Node.js v26+ compatibility with the custom undici dispatcher used by the qdrant client library
 if (typeof globalThis.fetch === 'function') {
@@ -20,17 +21,24 @@ let client = null;
 
 function getQdrantClient() {
     if (!client) {
-        client = new QdrantClient({
+        const options = {
             url: QDRANT_URL,
             apiKey: QDRANT_API_KEY,
             checkCompatibility: false
-        });
+        };
+
+        // Fix for Qdrant Cloud HTTPS port mapping issue where SDK defaults to :6333
+        if (QDRANT_URL.startsWith('https://') && !QDRANT_URL.includes(':', 8)) {
+            options.port = 443;
+        }
+
+        client = new QdrantClient(options);
     }
     return client;
 }
 
 /**
- * Ensures the Qdrant collection exists and is configured for Gemini gemini-embedding-001 (3072 dimensions).
+ * Ensures the Qdrant collection exists and is configured dynamically for the current embedding dimension.
  */
 async function ensureCollection() {
     const qClient = getQdrantClient();
@@ -43,7 +51,7 @@ async function ensureCollection() {
             console.log(`Collection "${COLLECTION_NAME}" does not exist. Creating it now...`);
             await qClient.createCollection(COLLECTION_NAME, {
                 vectors: {
-                    size: 3072, // Gemini gemini-embedding-001 dimension
+                    size: EMBEDDING_DIM,
                     distance: 'Cosine'
                 }
             });
@@ -58,18 +66,18 @@ async function ensureCollection() {
                 const isUnnamedVector = vectors && typeof vectors.size === 'number';
                 const currentSize = isUnnamedVector ? vectors.size : null;
                 
-                if (!isUnnamedVector || currentSize !== 3072) {
-                    console.log(`[QDRANT WARNING] Collection "${COLLECTION_NAME}" does not have a single unnamed vector of size 3072 (isUnnamedVector: ${isUnnamedVector}, size: ${currentSize}). Recreating it...`);
+                if (!isUnnamedVector || currentSize !== EMBEDDING_DIM) {
+                    console.log(`[QDRANT WARNING] Collection "${COLLECTION_NAME}" does not have a single unnamed vector of size ${EMBEDDING_DIM} (isUnnamedVector: ${isUnnamedVector}, size: ${currentSize}). Recreating it...`);
                     await qClient.deleteCollection(COLLECTION_NAME);
                     await qClient.createCollection(COLLECTION_NAME, {
                         vectors: {
-                            size: 3072,
+                            size: EMBEDDING_DIM,
                             distance: 'Cosine'
                         }
                     });
-                    console.log(`Collection "${COLLECTION_NAME}" recreated successfully with a single unnamed 3072-dimensional vector.`);
+                    console.log(`Collection "${COLLECTION_NAME}" recreated successfully with a single unnamed ${EMBEDDING_DIM}-dimensional vector.`);
                 } else {
-                    console.log(`Collection "${COLLECTION_NAME}" verified successfully with correct single unnamed vector size (3072).`);
+                    console.log(`Collection "${COLLECTION_NAME}" verified successfully with correct single unnamed vector size (${EMBEDDING_DIM}).`);
                 }
             } catch (checkErr) {
                 console.warn(`[QDRANT WARNING] Could not verify collection parameters: ${checkErr.message}. Proceeding...`);

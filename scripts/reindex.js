@@ -2,7 +2,7 @@
  * scripts/reindex.js
  * 
  * One-shot reindex script to re-embed all knowledge documents into Qdrant
- * using the new Gemini gemini-embedding-001 (3072-dim) embedding model.
+ * using the NVIDIA API (with Gemini fallback) embedding model.
  * 
  * Usage:
  *   npm run reindex
@@ -20,6 +20,7 @@ const fs = require('fs');
 const path = require('path');
 const { processFile } = require('./processor');
 const { ensureCollection } = require('./qdrant');
+const { EMBEDDING_DIM } = require('./embedder');
 
 const rootDir = path.resolve(__dirname, '..');
 const knowledgeDir = path.join(rootDir, 'knowledge');
@@ -56,11 +57,11 @@ function collectFiles(dir) {
 
 async function main() {
     console.log('===========================================');
-    console.log('  LASAK AI — Gemini Embedding Reindexer  ');
-    console.log('  Model: gemini-embedding-001 (3072-dim)  ');
+    console.log('  LASAK AI — Embedding Reindexer  ');
+    console.log(`  Model: NVIDIA nv-embedqa-e5-v5 (${EMBEDDING_DIM}-dim)  `);
     console.log('===========================================\n');
 
-    // Step 1: Ensure the Qdrant collection exists with 3072 dimensions
+    // Step 1: Ensure the Qdrant collection exists
     console.log('[REINDEX] Ensuring Qdrant collection is ready...');
     await ensureCollection();
     console.log('[REINDEX] Qdrant collection verified.\n');
@@ -114,7 +115,7 @@ async function main() {
     console.log(`  Files processed : ${successCount} succeeded, ${failCount} failed`);
     console.log(`  Total chunks    : ${totalChunks}`);
     console.log(`  Qdrant collection: lasak_knowledge`);
-    console.log(`  Embedding model : gemini-embedding-001 (3072-dim)`);
+    console.log(`  Embedding model : NVIDIA nv-embedqa-e5-v5 (${EMBEDDING_DIM}-dim)`);
     console.log('===========================================\n');
 
     if (failCount > 0) {

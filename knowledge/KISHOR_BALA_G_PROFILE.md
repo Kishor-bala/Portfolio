@@ -4,13 +4,13 @@
 
 **Full Name:** Kishor Bala G
 
-**Email:** [Gmail](mailto:kishorbala0003@gmail.com) (kishorbala0003@gmail.com)
+**Email:** [Gmail](mailto:kishorbala003@gmail.com)
 
-**Phone:** Not available (I only share my email [Gmail](mailto:kishorbala0003@gmail.com) and [LinkedIn](https://www.linkedin.com/in/kishor-bala-g-a28a23257/) profile for contacting, I cannot provide a phone number as of now)
+**Phone:** Not available (I only share my email [Gmail](mailto:kishorbala003@gmail.com) and [LinkedIn](https://www.linkedin.com/in/kishor-bala-g-a28a23257) profile for contacting, I cannot provide a phone number as of now)
 
 **Location:** Samalapuram, Tiruppur, Tamil Nadu, India
 
-**LinkedIn:** [LinkedIn](https://www.linkedin.com/in/kishor-bala-g-a28a23257/)
+**LinkedIn:** [LinkedIn](https://www.linkedin.com/in/kishor-bala-g-a28a23257)
 
 **GitHub:** [GitHub](https://github.com/Kishor-bala)
 
@@ -80,28 +80,10 @@ Computer Science and Engineering student with strong interests in Artificial Int
 ---
 
 # Technical Skills
-
-## Languages
 - Python
-- JavaScript
-- HTML
-- CSS
-- C++ (Basics)
-
-## AI & Backend
-- RAG
-- Vector Databases
-- Embeddings
-- Prompt Engineering
-- Redis
-- REST APIs
-- Job Queues
-- Rate Limiting
-
-## Tools
-- Git
-- GitHub
-- VS Code
+- C++
+- Cloud Computing
+- DBMS
+- MERN Stack
+- n8n Automations
 - Linux
-- VirtualBox
-- n8n

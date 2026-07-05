@@ -813,9 +813,9 @@ strong {
     pointer-events: auto; /* Allow interaction */
 }
 
-/* Floating animation only when chat panel is hidden */
-.minecraft-chatbot-container:has(.chatbot-panel.hidden) {
-    animation: chatbot-float 3s ease-in-out infinite;
+/* Floating animation for the chatbot container (always floating) */
+.minecraft-chatbot-container {
+    animation: chatbot-float 4s ease-in-out infinite;
 }
 
 @keyframes chatbot-float {
@@ -845,11 +845,11 @@ strong {
     --cb-torch-highlight: #e0f2fe;
     --cb-torch-handle: #783e0e;
     --cb-torch-base: #452205;
-    --cb-panel-bg: linear-gradient(135deg, #051b2c 0%, #030d1a 100%);
+    --cb-panel-bg: linear-gradient(135deg, rgba(5, 27, 44, 0.85) 0%, rgba(3, 13, 26, 0.9) 100%);
     --cb-panel-border-top-left: #06b6d4;
     --cb-panel-border-right-bottom: #1e3a8a;
-    --cb-panel-glow: rgba(6, 182, 212, 0.4);
-    --cb-header-bg: #031322;
+    --cb-panel-glow: rgba(6, 182, 212, 0.45);
+    --cb-header-bg: rgba(3, 19, 34, 0.7);
     --cb-title-color: #06b6d4;
     --cb-close-bg: #ae1818;
     --cb-close-hover: #c92222;
@@ -872,7 +872,7 @@ strong {
     --cb-sug-chip-border-top-left: #06b6d4;
     --cb-sug-chip-border-right-bottom: #0369a1;
     --cb-sug-chip-hover: #0284c7;
-    --cb-form-bg: #03101e;
+    --cb-form-bg: rgba(3, 16, 30, 0.75);
     --cb-input-bg: #01050a;
     --cb-input-border-top-left: #0369a1;
     --cb-input-border-right-bottom: #06b6d4;
@@ -907,11 +907,11 @@ strong {
     --cb-torch-highlight: #a7f3d0;
     --cb-torch-handle: #783e0e;
     --cb-torch-base: #452205;
-    --cb-panel-bg: linear-gradient(135deg, #062f22 0%, #0d1e15 100%);
+    --cb-panel-bg: linear-gradient(135deg, rgba(6, 47, 34, 0.85) 0%, rgba(13, 30, 21, 0.9) 100%);
     --cb-panel-border-top-left: #10b981;
     --cb-panel-border-right-bottom: #064e3b;
-    --cb-panel-glow: rgba(16, 185, 129, 0.4);
-    --cb-header-bg: #0a2e21;
+    --cb-panel-glow: rgba(16, 185, 129, 0.45);
+    --cb-header-bg: rgba(10, 46, 33, 0.7);
     --cb-title-color: #10b981;
     --cb-close-bg: #ae1818;
     --cb-close-hover: #c92222;
@@ -934,7 +934,7 @@ strong {
     --cb-sug-chip-border-top-left: #10b981;
     --cb-sug-chip-border-right-bottom: #064e3b;
     --cb-sug-chip-hover: #10b981;
-    --cb-form-bg: #06251b;
+    --cb-form-bg: rgba(6, 37, 27, 0.75);
     --cb-input-bg: #020f0a;
     --cb-input-border-top-left: #064e3b;
     --cb-input-border-right-bottom: #10b981;
@@ -969,11 +969,11 @@ strong {
     --cb-torch-highlight: #fca5a5;
     --cb-torch-handle: #783e0e;
     --cb-torch-base: #452205;
-    --cb-panel-bg: linear-gradient(135deg, #2e1d0c 0%, #1e1104 100%);
+    --cb-panel-bg: linear-gradient(135deg, rgba(46, 29, 12, 0.85) 0%, rgba(30, 17, 4, 0.9) 100%);
     --cb-panel-border-top-left: #fbbf24;
     --cb-panel-border-right-bottom: #854d0e;
-    --cb-panel-glow: rgba(251, 191, 36, 0.35);
-    --cb-header-bg: #221305;
+    --cb-panel-glow: rgba(251, 191, 36, 0.4);
+    --cb-header-bg: rgba(34, 19, 5, 0.7);
     --cb-title-color: #fbbf24;
     --cb-close-bg: #ae1818;
     --cb-close-hover: #c92222;
@@ -996,7 +996,7 @@ strong {
     --cb-sug-chip-border-top-left: #ca8a04;
     --cb-sug-chip-border-right-bottom: #78350f;
     --cb-sug-chip-hover: #ca8a04;
-    --cb-form-bg: #1f1204;
+    --cb-form-bg: rgba(31, 18, 4, 0.75);
     --cb-input-bg: #090501;
     --cb-input-border-top-left: #78350f;
     --cb-input-border-right-bottom: #ca8a04;
@@ -1031,11 +1031,11 @@ strong {
     --cb-torch-highlight: #e0f2fe;
     --cb-torch-handle: #783e0e;
     --cb-torch-base: #452205;
-    --cb-panel-bg: linear-gradient(135deg, #051b2c 0%, #030d1a 100%);
+    --cb-panel-bg: linear-gradient(135deg, rgba(5, 27, 44, 0.85) 0%, rgba(3, 13, 26, 0.9) 100%);
     --cb-panel-border-top-left: #06b6d4;
     --cb-panel-border-right-bottom: #1e3a8a;
-    --cb-panel-glow: rgba(6, 182, 212, 0.4);
-    --cb-header-bg: #031322;
+    --cb-panel-glow: rgba(6, 182, 212, 0.45);
+    --cb-header-bg: rgba(3, 19, 34, 0.7);
     --cb-title-color: #06b6d4;
     --cb-close-bg: #ae1818;
     --cb-close-hover: #c92222;
@@ -1058,7 +1058,7 @@ strong {
     --cb-sug-chip-border-top-left: #06b6d4;
     --cb-sug-chip-border-right-bottom: #0369a1;
     --cb-sug-chip-hover: #0284c7;
-    --cb-form-bg: #03101e;
+    --cb-form-bg: rgba(3, 16, 30, 0.75);
     --cb-input-bg: #01050a;
     --cb-input-border-top-left: #0369a1;
     --cb-input-border-right-bottom: #06b6d4;
@@ -1093,11 +1093,11 @@ strong {
     --cb-torch-highlight: #ff8585;
     --cb-torch-handle: #783e0e;
     --cb-torch-base: #452205;
-    --cb-panel-bg: linear-gradient(135deg, #0b071e 0%, #1c0e3a 100%);
+    --cb-panel-bg: linear-gradient(135deg, rgba(11, 7, 30, 0.85) 0%, rgba(28, 14, 58, 0.9) 100%);
     --cb-panel-border-top-left: #701a75;
     --cb-panel-border-right-bottom: #2e0854;
-    --cb-panel-glow: rgba(168, 85, 247, 0.45);
-    --cb-header-bg: #1a103c;
+    --cb-panel-glow: rgba(168, 85, 247, 0.5);
+    --cb-header-bg: rgba(26, 16, 60, 0.7);
     --cb-title-color: #f472b6;
     --cb-close-bg: #701a75;
     --cb-close-hover: #db2777;
@@ -1120,7 +1120,7 @@ strong {
     --cb-sug-chip-border-top-left: #5b21b6;
     --cb-sug-chip-border-right-bottom: #1e1b4b;
     --cb-sug-chip-hover: #4c1d95;
-    --cb-form-bg: #170b2c;
+    --cb-form-bg: rgba(23, 11, 44, 0.75);
     --cb-input-bg: #090514;
     --cb-input-border-top-left: #2a114d;
     --cb-input-border-right-bottom: #db2777;
@@ -1155,11 +1155,11 @@ strong {
     --cb-torch-highlight: #ffedd5;
     --cb-torch-handle: #783e0e;
     --cb-torch-base: #452205;
-    --cb-panel-bg: linear-gradient(135deg, #270c0c 0%, #170404 100%);
+    --cb-panel-bg: linear-gradient(135deg, rgba(39, 12, 12, 0.85) 0%, rgba(23, 4, 4, 0.9) 100%);
     --cb-panel-border-top-left: #ef4444;
     --cb-panel-border-right-bottom: #7f1d1d;
-    --cb-panel-glow: rgba(239, 68, 68, 0.35);
-    --cb-header-bg: #1e0606;
+    --cb-panel-glow: rgba(239, 68, 68, 0.4);
+    --cb-header-bg: rgba(30, 6, 6, 0.7);
     --cb-title-color: #f97316;
     --cb-close-bg: #0284c7;
     --cb-close-hover: #06b6d4;
@@ -1182,7 +1182,7 @@ strong {
     --cb-sug-chip-border-top-left: #ef4444;
     --cb-sug-chip-border-right-bottom: #991b1b;
     --cb-sug-chip-hover: #b91c1c;
-    --cb-form-bg: #1f0505;
+    --cb-form-bg: rgba(31, 5, 5, 0.75);
     --cb-input-bg: #0d0101;
     --cb-input-border-top-left: #991b1b;
     --cb-input-border-right-bottom: #ef4444;
@@ -1375,7 +1375,9 @@ strong {
     border-left-color: var(--cb-panel-border-top-left);
     border-right-color: var(--cb-panel-border-right-bottom);
     border-bottom-color: var(--cb-panel-border-right-bottom);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), inset 0 0 15px var(--cb-panel-glow);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.85), 0 0 25px var(--cb-panel-glow), inset 0 0 15px var(--cb-panel-glow);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -1569,6 +1571,19 @@ strong {
 .message-bubble li {
     margin-bottom: 4px;
 }
+
+.message-bubble h1, .message-bubble h2, .message-bubble h3, .message-bubble h4, .message-bubble h5, .message-bubble h6 {
+    margin-top: 12px;
+    margin-bottom: 6px;
+    color: #55ff55; /* Bright Minecraft Green */
+    font-weight: bold;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+    font-family: inherit;
+}
+.message-bubble h1 { font-size: 1.15rem; }
+.message-bubble h2 { font-size: 1.1rem; }
+.message-bubble h3 { font-size: 1.05rem; }
+.message-bubble h4, .message-bubble h5, .message-bubble h6 { font-size: 1rem; }
 
 .error-msg {
     color: #ff5555;
