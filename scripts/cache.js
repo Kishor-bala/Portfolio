@@ -278,5 +278,6 @@ module.exports = {
     getCacheStats,
     flushCache,
     normalizeQuestion,
-    buildCacheKey
+    buildCacheKey,
+    recordFaqHit
 };

@@ -8,7 +8,7 @@ require('dotenv').config();
 
 const { getQueryEmbedding } = require('../scripts/embedder');
 const { searchVector } = require('../scripts/qdrant');
-const { getCachedResponse, setCachedResponse, getCacheStats, flushCache } = require('../scripts/cache');
+const { getCachedResponse, setCachedResponse, getCacheStats, flushCache, recordFaqHit, buildCacheKey } = require('../scripts/cache');
 const { getRedisConnection } = require('../scripts/queue');
 const { rerankPassages } = require('../scripts/reranker');
 
@@ -262,7 +262,7 @@ async function callGroqAPI(apiKey, systemInstructionText, message, history) {
     const requestBody = {
         model: 'llama-3.3-70b-versatile',
         messages: messages,
-        temperature: 0.2
+        temperature: 0.7
     };
 
     const url = 'https://api.groq.com/openai/v1/chat/completions';
@@ -373,14 +373,18 @@ function ensureClickableLinks(text) {
         return '[GitHub](https://github.com/Kishor-bala)';
     });
 
-    // 3. Convert any raw Gmail address to [Gmail](mailto:kishorbala003@gmail.com)
-    const gmailRegex = /kishorbala000?3@gmail\.com/gi;
-    updated = updated.replace(gmailRegex, (match, offset, string) => {
-        const precedingChar = offset > 0 ? string[offset - 1] : '';
-        if (precedingChar === '[' || precedingChar === '(') return match;
-        if (offset >= 7 && string.substring(offset - 7, offset) === 'mailto:') return match;
-        return '[Gmail](mailto:kishorbala003@gmail.com)';
+    // 3. Convert any email markdown links (like [Gmail](mailto:email) or [Email](mailto:email)) to plain text words
+    const emailLinkRegex = /\[([^\]]+)\]\((?:mailto:)?([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\)/gi;
+    updated = updated.replace(emailLinkRegex, (match, label, email) => {
+        if (label.toLowerCase() === 'gmail' || label.toLowerCase() === 'email') {
+            return `Gmail: ${email}`;
+        }
+        return `${label} (${email})`;
     });
+
+    // Also match raw mailto: links that might not be in markdown brackets
+    const rawMailtoRegex = /mailto:([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/gi;
+    updated = updated.replace(rawMailtoRegex, '$1');
 
     // 4. Convert any markdown headers (e.g. ### Header) into bold text to avoid raw ## symbols
     updated = updated.replace(/^(#{1,6})\s+(.+)$/gm, '**$2**');
@@ -397,19 +401,15 @@ app.post('/api/chat', async (req, res) => {
         }
 
         // ── Redis Cache Check ────────────────────────────────────────────────
-        // Only cache standalone questions (no history). Conversation follow-ups
-        // are context-dependent and must always be freshly generated.
+        // Cache retrieval is bypassed to allow the chatbot to generate a fresh, friendly response every time.
+        // We still record the question hit stats for analytics.
         const isStandaloneQuestion = history.length === 0;
         if (isStandaloneQuestion) {
-            const cached = await getCachedResponse(message);
-            if (cached) {
-                console.log(`[CACHE] Serving cached response. Saved an API call! 💰`);
-                return res.json({
-                    status: "success",
-                    reply: cached.reply,
-                    cached: true,
-                    cachedAt: cached.cachedAt
-                });
+            try {
+                const key = buildCacheKey(message);
+                await recordFaqHit(message, key);
+            } catch (cacheErr) {
+                console.warn('[CACHE WARNING] Failed to record FAQ hit:', cacheErr.message);
             }
         }
 
@@ -430,6 +430,7 @@ Tone & Personality:
 - Use a warm tone, but do not become too casual.
 - Avoid boring repeated openings like “Here is the answer” or “Sure”.
 - Do not overuse emojis.
+- DYNAMIC VARIATION: To keep interactions engaging, generate a fresh and unique message every time a question is asked. Use a variety of friendly phrasings, warm greetings, and structure your responses differently so that the user gets a slightly different, natural, and friendly message each time, even for the same or similar questions. Avoid using rigid templates or repeating the exact same sentences.
 
 Response Quality:
 - Give exceptionally high-quality, well-structured, and highly readable answers using clear sections and bold headings.
@@ -454,16 +455,17 @@ Off-topic Questions:
 - Do not answer unrelated questions even if you know the answer.
 
 Contact & Links Rules:
-- If the user asks for contact details, social links, GitHub, LinkedIn, or email, provide them only as clickable links.
-- Do not show raw URLs as plain text.
-- Do not write the Gmail address as plain text unless it is inside a mailto link.
+- If the user asks for contact details, social links, GitHub, LinkedIn, or email, provide them.
+- GitHub and LinkedIn MUST be provided only as clickable links.
+- For email, DO NOT use mailto links, and DO NOT hide the email address inside link text like [Gmail](...) or [Email](...). Instead, you MUST write out the email address in plain text words: "Gmail: kishorbala003@gmail.com" (or kishorbala003@gmail.com). This is because the user cannot open email links and needs the raw words.
+- If the user asks how to contact Kishor or for contact details, you MUST also suggest they can send a message directly using the "Connect With Me" contact form section at the bottom of the page.
 - Use this format:
 
 [LinkedIn](https://www.linkedin.com/in/kishor-bala-g-a28a23257)  
 [GitHub](https://github.com/Kishor-bala)  
-[Email](mailto:kishorbala003@gmail.com)
+Gmail: kishorbala003@gmail.com
 
-- If only one link is asked, show only that link.
+- If only one link is asked, show only that link/detail.
 - Do not add unnecessary explanation around links unless needed.
 
 Professional Branding:
